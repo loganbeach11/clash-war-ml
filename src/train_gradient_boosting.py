@@ -8,9 +8,7 @@ from sklearn.metrics import (
 )
 
 
-# -----------------------------
-# LOAD DATA
-# -----------------------------
+# Load data
 
 df = pd.read_csv(
     "data/model_dataset.csv",
@@ -20,9 +18,7 @@ df = pd.read_csv(
 print("Dataset shape:", df.shape)
 
 
-# -----------------------------
-# FEATURES
-# -----------------------------
+# Features
 
 feature_columns = [
     # Player history
@@ -46,9 +42,7 @@ feature_columns = [
 target_column = "fame"
 
 
-# -----------------------------
-# TIME-BASED SPLIT
-# -----------------------------
+# Time-based split
 
 war_dates = sorted(
     df["race_date"].unique()
@@ -89,9 +83,7 @@ print(
 )
 
 
-# -----------------------------
-# X AND Y
-# -----------------------------
+# X and y
 
 X_train = train_df[feature_columns]
 y_train = train_df[target_column]
@@ -100,9 +92,7 @@ X_test = test_df[feature_columns]
 y_test = test_df[target_column]
 
 
-# -----------------------------
-# GRADIENT BOOSTING MODEL
-# -----------------------------
+# Gradient boosting model
 
 model = GradientBoostingRegressor(
     n_estimators=200,
@@ -118,9 +108,7 @@ model.fit(
 )
 
 
-# -----------------------------
-# PREDICTIONS
-# -----------------------------
+# Predictions
 
 predictions = model.predict(
     X_test
@@ -131,9 +119,7 @@ predictions = model.predict(
 predictions = predictions.clip(min=0)
 
 
-# -----------------------------
-# METRICS
-# -----------------------------
+# Metrics
 
 mae = mean_absolute_error(
     y_test,
@@ -158,9 +144,7 @@ print("RMSE:", rmse)
 print("R^2:", r2)
 
 
-# -----------------------------
-# FEATURE IMPORTANCE
-# -----------------------------
+# Feature importance
 
 importance_df = pd.DataFrame({
     "feature": feature_columns,
@@ -179,9 +163,7 @@ print(
 )
 
 
-# -----------------------------
-# SAMPLE PREDICTIONS
-# -----------------------------
+# Sample predictions
 
 results = test_df[
     [

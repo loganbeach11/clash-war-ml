@@ -8,9 +8,7 @@ from sklearn.ensemble import (
 )
 
 
-# ================================================================
-# CONFIGURATION
-# ================================================================
+# Configuration
 
 GALACTIC_KINGS_TAG = "#Y9202P9U"
 GALACTIC_KINGS_DAILY_SLOTS = 50
@@ -24,9 +22,7 @@ PLAYER_OUTPUT_FILE = "data/gk_live_player_predictions.csv"
 SUMMARY_OUTPUT_FILE = "data/gk_live_player_summary.csv"
 
 
-# ================================================================
-# FEATURE LIST
-# ================================================================
+# Feature list
 
 FEATURE_COLUMNS = [
     "last_3_avg_fame",
@@ -45,9 +41,7 @@ FEATURE_COLUMNS = [
 ]
 
 
-# ================================================================
-# HELPER: NORMALIZE PLAYER WEIGHTS TO 50 DAILY SLOTS
-# ================================================================
+# Normalize player weights to 50 daily slots
 
 def normalize_to_slots(
     probabilities,
@@ -177,9 +171,7 @@ def normalize_to_slots(
     )
 
 
-# ================================================================
-# LOAD HISTORICAL TRAINING DATA
-# ================================================================
+# Load historical training data
 
 # Keep the larger historical dataset for model training for now.
 #
@@ -198,9 +190,7 @@ print(
 )
 
 
-# ================================================================
-# LOAD LIVE FEATURES — GK ONLY
-# ================================================================
+# Load GK live features
 
 live = pd.read_csv(
     LIVE_FEATURE_FILE
@@ -226,9 +216,7 @@ if gk_live.empty:
     )
 
 
-# ================================================================
-# GK ROTATION POOL
-# ================================================================
+# GK rotation pool
 
 # Any GK player observed in this live race is part of the rotation
 # pool, whether currently in the clan or temporarily outside it.
@@ -279,9 +267,7 @@ print(
 )
 
 
-# ================================================================
-# VALIDATE FEATURES
-# ================================================================
+# Validate features
 
 missing_history_features = [
     column
@@ -316,9 +302,7 @@ if missing_live_features:
     )
 
 
-# ================================================================
-# TRAIN LINEAR REGRESSION MODEL
-# ================================================================
+# Train linear regression model
 
 X_history = history[
     FEATURE_COLUMNS
@@ -337,9 +321,7 @@ linear_model.fit(
 )
 
 
-# ================================================================
-# TRAIN PARTICIPATION MODEL
-# ================================================================
+# Train participation model
 
 history[
     "participated"
@@ -369,9 +351,7 @@ participation_model.fit(
 )
 
 
-# ================================================================
-# TRAIN ACTIVE-DECK MODEL
-# ================================================================
+# Train active-deck model
 
 active_history = history[
     history[
@@ -402,9 +382,7 @@ deck_model.fit(
 )
 
 
-# ================================================================
-# CREATE EMPTY PREDICTION COLUMNS
-# ================================================================
+# Create prediction columns
 
 prediction_columns = [
     "linear_predicted_fame",
@@ -427,9 +405,7 @@ for column in prediction_columns:
     ] = np.nan
 
 
-# ================================================================
-# TIER 1: FULL ML MODEL
-# ================================================================
+# Tier 1: full ML model
 
 ml_mask = (
     forecast_live[
@@ -450,9 +426,7 @@ if not ml_live.empty:
     ]
 
 
-    # ------------------------------------------------------------
-    # LINEAR REGRESSION
-    # ------------------------------------------------------------
+# Linear regression
 
     linear_predictions = (
         linear_model.predict(
@@ -467,9 +441,7 @@ if not ml_live.empty:
     )
 
 
-    # ------------------------------------------------------------
-    # PARTICIPATION
-    # ------------------------------------------------------------
+# Participation
 
     participation_probability = (
         participation_model.predict_proba(
@@ -484,9 +456,7 @@ if not ml_live.empty:
     ).astype(int)
 
 
-    # ------------------------------------------------------------
-    # ACTIVE DECKS
-    # ------------------------------------------------------------
+# Active decks
 
     predicted_active_decks = (
         deck_model.predict(
@@ -502,9 +472,7 @@ if not ml_live.empty:
     )
 
 
-    # ------------------------------------------------------------
-    # EFFICIENCY
-    # ------------------------------------------------------------
+# Efficiency
 
     predicted_efficiency = (
         ml_live[
@@ -515,9 +483,7 @@ if not ml_live.empty:
     )
 
 
-    # ------------------------------------------------------------
-    # PIPELINE FAME
-    # ------------------------------------------------------------
+# Pipeline fame
 
     hard_predicted_fame = (
         predicted_participation
@@ -533,9 +499,7 @@ if not ml_live.empty:
     )
 
 
-    # ------------------------------------------------------------
-    # SAVE FULL-ML RESULTS
-    # ------------------------------------------------------------
+# Save full-ML results
 
     forecast_live.loc[
         ml_mask,
@@ -573,9 +537,7 @@ if not ml_live.empty:
     ] = expected_predicted_fame
 
 
-# ================================================================
-# FULL-ML PLAYER PERFORMANCE PREDICTION
-# ================================================================
+# Full-ML player performance prediction
 
 # Preserve the current midpoint ensemble so this remains comparable
 # with the previously evaluated live pipeline.
@@ -599,9 +561,7 @@ forecast_live.loc[
 ) / 2
 
 
-# ================================================================
-# TIER 2: LIMITED HISTORY
-# ================================================================
+# Tier 2: limited history
 
 limited_mask = (
     forecast_live[
@@ -632,9 +592,7 @@ forecast_live.loc[
 )
 
 
-# ================================================================
-# GK BASELINES FROM GK FULL-ML PLAYERS
-# ================================================================
+# GK baselines from full-ML players
 
 gk_ml_fame_baseline = (
     forecast_live.loc[
@@ -679,9 +637,7 @@ if pd.isna(
     )
 
 
-# ================================================================
-# TIER 3: NO HISTORY / GK BASELINE
-# ================================================================
+# Tier 3: no history / GK baseline
 
 baseline_mask = (
     forecast_live[
@@ -706,9 +662,7 @@ forecast_live.loc[
 )
 
 
-# ================================================================
-# FALLBACK SAFETY
-# ================================================================
+# Fallback safety
 
 forecast_live[
     "final_predicted_fame"
@@ -739,9 +693,7 @@ forecast_live[
 )
 
 
-# ================================================================
-# GK 50-SLOT DAILY PARTICIPATION NORMALIZATION
-# ================================================================
+# Normalize GK daily participation to 50 slots
 
 # GK fills all 50 participant slots on each Battle Day.
 #
@@ -782,9 +734,7 @@ print(
 )
 
 
-# ================================================================
-# CAPACITY-ADJUSTED PERFORMANCE
-# ================================================================
+# Capacity-adjusted performance
 
 # Convert the existing whole-war performance estimate into a
 # rotation-capacity-adjusted value.
@@ -841,9 +791,7 @@ forecast_live[
 )
 
 
-# ================================================================
-# SAFETY CHECKS
-# ================================================================
+# Safety checks
 
 missing_predictions = (
     forecast_live[
@@ -874,9 +822,7 @@ print(
 )
 
 
-# ================================================================
-# GK PLAYER SUMMARY FIELDS
-# ================================================================
+# GK player summary fields
 
 forecast_live[
     "projected_daily_fame"
@@ -908,9 +854,7 @@ forecast_live[
 )
 
 
-# ================================================================
-# GK SUMMARY
-# ================================================================
+# GK summary
 
 tier_counts = (
     forecast_live[
@@ -1045,9 +989,7 @@ summary = pd.DataFrame(
 )
 
 
-# ================================================================
-# OUTPUT
-# ================================================================
+# Output
 
 display_columns = [
     "player_name",
@@ -1136,9 +1078,7 @@ if archetype_counts:
         )
 
 
-# ================================================================
-# SAVE
-# ================================================================
+# Save
 
 forecast_live.to_csv(
     PLAYER_OUTPUT_FILE,

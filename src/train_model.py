@@ -4,18 +4,14 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 
-# --------------------------------
-# LOAD ML DATASET
-# --------------------------------
+# Load ML dataset
 
 df = pd.read_csv("data/model_dataset.csv")
 
 print("Dataset shape:", df.shape)
 
 
-# --------------------------------
-# SELECT FEATURES AND TARGET
-# --------------------------------
+# Select features and target
 
 feature_columns = [
     # Player history
@@ -39,9 +35,7 @@ feature_columns = [
 target_column = "fame"
 
 
-# --------------------------------
-# TIME-BASED TRAIN / TEST SPLIT
-# --------------------------------
+# Time-based train/test split
 
 # Convert race_date back to datetime
 df["race_date"] = pd.to_datetime(df["race_date"])
@@ -57,9 +51,7 @@ df["race_week"] = (
 # Sort by time so older wars come before newer wars
 df = df.sort_values("race_date")
 
-# --------------------------------
-# TIME-BASED SPLIT BY WHOLE WARS
-# --------------------------------
+# Time-based split by whole weeks
 
 # Get unique war dates in chronological order
 weeks = sorted(
@@ -109,25 +101,19 @@ print(
 )
 
 
-# --------------------------------
-# TRAIN BASELINE MODEL
-# --------------------------------
+# Train baseline model
 
 model = LinearRegression()
 
 model.fit(X_train, y_train)
 
 
-# --------------------------------
-# MAKE PREDICTIONS
-# --------------------------------
+# Make predictions
 
 predictions = model.predict(X_test)
 
 
-# --------------------------------
-# EVALUATE MODEL
-# --------------------------------
+# Evaluate model
 
 mae = mean_absolute_error(y_test, predictions)
 
@@ -144,9 +130,7 @@ print("RMSE:", rmse)
 print("R^2:", r2)
 
 
-# --------------------------------
-# VIEW SOME PREDICTIONS
-# --------------------------------
+# View sample predictions
 
 results = test_df[
     [

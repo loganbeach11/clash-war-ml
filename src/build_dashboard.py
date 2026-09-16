@@ -4,9 +4,7 @@ from datetime import datetime
 import pandas as pd
 
 
-# ================================================================
-# CONFIGURATION
-# ================================================================
+# Configuration
 
 OUTPUT_FILE = "reports/gk_war_dashboard.html"
 
@@ -37,9 +35,7 @@ FILES = {
 }
 
 
-# ================================================================
-# HELPERS
-# ================================================================
+# Helpers
 
 def load_csv(path):
 
@@ -191,9 +187,7 @@ def dataframe_to_html(
     )
 
 
-# ================================================================
-# LOAD DATA
-# ================================================================
+# Load data
 
 war_projection = load_csv(
     FILES[
@@ -244,9 +238,7 @@ backups = load_csv(
 )
 
 
-# ================================================================
-# WAR MODE
-# ================================================================
+# War mode
 
 war_mode = "unknown"
 
@@ -278,9 +270,7 @@ mode_label = (
 )
 
 
-# ================================================================
-# WAR SUMMARY VALUES
-# ================================================================
+# War summary values
 
 war_row = (
     war_projection.iloc[
@@ -420,9 +410,7 @@ historical_races_available = (
 )
 
 
-# ================================================================
-# PLAYER SUMMARY VALUES
-# ================================================================
+# Player summary values
 
 player_row = (
     player_summary.iloc[
@@ -542,9 +530,7 @@ projected_daily_fame = (
 )
 
 
-# ================================================================
-# ROTATION SUMMARY VALUES
-# ================================================================
+# Rotation summary values
 
 rotation_row = (
     rotation_summary.iloc[
@@ -591,9 +577,7 @@ confirmed_active_outside_clan = (
 )
 
 
-# ================================================================
-# FORMAT DAY PROJECTION
-# ================================================================
+# Format day projection
 
 day_table = (
     day_projection.copy()
@@ -667,9 +651,7 @@ if not day_table.empty:
         )
 
 
-# ================================================================
-# FORMAT ARCHETYPE SUMMARY
-# ================================================================
+# Format archetype summary
 
 archetype_table = (
     archetype_summary.copy()
@@ -720,9 +702,7 @@ if not archetype_table.empty:
             )
 
 
-# ================================================================
-# TOP PLAYER PREDICTIONS
-# ================================================================
+# Top player predictions
 
 top_players = (
     player_predictions.copy()
@@ -790,9 +770,7 @@ if not top_players.empty:
             )
 
 
-# ================================================================
-# FORMAT ACTIVE LINEUP
-# ================================================================
+# Format active lineup
 
 active_table = (
     active_lineup.copy()
@@ -853,9 +831,7 @@ if not active_table.empty:
             )
 
 
-# ================================================================
-# FORMAT BACKUPS
-# ================================================================
+# Format backups
 
 backup_table = (
     backups.copy()
@@ -931,9 +907,7 @@ if not backup_table.empty:
         )
 
 
-# ================================================================
-# MODE-SPECIFIC DASHBOARD TEXT
-# ================================================================
+# Mode-specific dashboard text
 
 if is_colosseum:
 
@@ -960,9 +934,7 @@ else:
     )
 
 
-# ================================================================
-# MODE-SPECIFIC HTML BLOCKS
-# ================================================================
+# Mode-specific HTML blocks
 
 if is_colosseum:
 
@@ -1018,9 +990,7 @@ else:
     """
 
 
-# ================================================================
 # HTML
-# ================================================================
 
 generated_time = (
     datetime.now()
@@ -1922,9 +1892,7 @@ body {{
 """
 
 
-# ================================================================
-# SAVE REPORT
-# ================================================================
+# Save report
 
 os.makedirs(
     os.path.dirname(

@@ -11,9 +11,7 @@ from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
 
 
-# ================================================================
-# CONFIGURATION
-# ================================================================
+# Configuration
 
 load_dotenv()
 
@@ -45,9 +43,7 @@ engine = create_engine(
 )
 
 
-# ================================================================
-# LOAD HISTORICAL MODEL DATA
-# ================================================================
+# Load historical model data
 
 history = pd.read_csv(
     HISTORY_FILE
@@ -59,9 +55,7 @@ print(
 )
 
 
-# ================================================================
-# GET LATEST LIVE RACE
-# ================================================================
+# Get latest live race
 
 latest_race_query = """
 SELECT
@@ -94,9 +88,7 @@ print(
 )
 
 
-# ================================================================
-# LOAD CURRENT GK ROTATION POOL DIRECTLY FROM MYSQL
-# ================================================================
+# Load current GK rotation pool from MySQL
 
 # Anyone who has appeared for GK in the current live race is part of
 # the current rotation pool, whether currently in the clan or rotated
@@ -190,9 +182,7 @@ print(
 )
 
 
-# ================================================================
-# FILTER HISTORY TO CURRENT GK ROTATION POOL
-# ================================================================
+# Filter history to current GK rotation pool
 
 # We study current GK players only, while preserving each player's full
 # available historical performance history.
@@ -220,9 +210,7 @@ if gk_history.empty:
     )
 
 
-# ================================================================
-# REQUIRED COLUMNS
-# ================================================================
+# Required columns
 
 required_columns = [
     "player_tag",
@@ -250,9 +238,7 @@ if missing_columns:
     )
 
 
-# ================================================================
-# BUILD ONE LONG-TERM PROFILE PER GK PLAYER
-# ================================================================
+# Build one long-term profile per GK player
 
 player_profiles = (
     gk_history
@@ -313,9 +299,7 @@ player_profiles = (
 )
 
 
-# ================================================================
-# CLEAN PLAYER PROFILES
-# ================================================================
+# Clean player profiles
 
 player_profiles[
     "fame_std"
@@ -353,9 +337,7 @@ player_profiles[
 )
 
 
-# ================================================================
-# ELIGIBLE PLAYERS
-# ================================================================
+# Eligible players
 
 cluster_data = player_profiles[
     player_profiles[
@@ -390,9 +372,7 @@ print(
 )
 
 
-# ================================================================
-# CLUSTER FEATURES
-# ================================================================
+# Cluster features
 
 CLUSTER_FEATURES = [
     "avg_fame",
@@ -410,9 +390,7 @@ X = cluster_data[
 ].copy()
 
 
-# ================================================================
-# SCALE FEATURES
-# ================================================================
+# Scale features
 
 scaler = StandardScaler()
 
@@ -421,9 +399,7 @@ X_scaled = scaler.fit_transform(
 )
 
 
-# ================================================================
-# VALID CLUSTER COUNTS
-# ================================================================
+# Valid cluster counts
 
 valid_cluster_options = [
     k
@@ -443,9 +419,7 @@ if not valid_cluster_options:
     )
 
 
-# ================================================================
-# TEST DIFFERENT NUMBERS OF CLUSTERS
-# ================================================================
+# Test different cluster counts
 
 scores = {}
 
@@ -498,9 +472,7 @@ if not scores:
     )
 
 
-# ================================================================
-# SELECT BEST K
-# ================================================================
+# Select best k
 
 best_k = max(
     scores,
@@ -514,9 +486,7 @@ print(
 )
 
 
-# ================================================================
-# FINAL K-MEANS MODEL
-# ================================================================
+# Final K-Means model
 
 final_model = KMeans(
     n_clusters=best_k,
@@ -532,9 +502,7 @@ cluster_data[
 )
 
 
-# ================================================================
-# RAW CLUSTER SUMMARY
-# ================================================================
+# Raw cluster summary
 
 cluster_summary = (
     cluster_data
@@ -591,9 +559,7 @@ cluster_summary = (
 )
 
 
-# ================================================================
-# BEHAVIOR SCORE
-# ================================================================
+# Behavior score
 
 summary_for_score = (
     cluster_summary.copy()
@@ -694,9 +660,7 @@ cluster_summary = cluster_summary.merge(
 )
 
 
-# ================================================================
-# DYNAMIC ARCHETYPE NAMES
-# ================================================================
+# Dynamic archetype names
 
 ordered_clusters = (
     cluster_summary
@@ -774,9 +738,7 @@ cluster_summary[
 )
 
 
-# ================================================================
-# ADD CURRENT GK MEMBERSHIP
-# ================================================================
+# Add current GK membership
 
 membership = (
     gk_pool[
@@ -805,9 +767,7 @@ cluster_data[
 ] = 1
 
 
-# ================================================================
-# ORDER SUMMARY
-# ================================================================
+# Order summary
 
 cluster_summary = cluster_summary[
     [
@@ -827,9 +787,7 @@ cluster_summary = cluster_summary[
 ]
 
 
-# ================================================================
-# OUTPUT
-# ================================================================
+# Output
 
 print(
     "\nGALACTIC KINGS ARCHETYPE SUMMARY"
@@ -919,9 +877,7 @@ for archetype_name in ordered_names:
     )
 
 
-# ================================================================
-# PLAYERS WITHOUT ENOUGH HISTORY
-# ================================================================
+# Players without enough history
 
 eligible_tags = set(
     cluster_data[
@@ -953,9 +909,7 @@ print(
 )
 
 
-# ================================================================
-# SAVE
-# ================================================================
+# Save
 
 cluster_data.to_csv(
     OUTPUT_FILE,

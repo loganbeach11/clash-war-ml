@@ -10,9 +10,7 @@ from sklearn.metrics import (
 )
 
 
-# --------------------------------
-# LOAD DATA
-# --------------------------------
+# Load data
 
 df = pd.read_csv("data/model_dataset.csv")
 
@@ -34,9 +32,7 @@ df = df.sort_values(
 )
 
 
-# --------------------------------
-# FEATURES
-# --------------------------------
+# Features
 
 feature_columns = [
     # Player history
@@ -58,9 +54,7 @@ feature_columns = [
 ]
 
 
-# --------------------------------
-# CREATE CLASSIFICATION TARGET
-# --------------------------------
+# Create classification target
 
 # 1 = player participated
 # 0 = player did not participate
@@ -70,9 +64,7 @@ df["participated_target"] = (
 ).astype(int)
 
 
-# --------------------------------
-# SPLIT BY WHOLE WEEKS
-# --------------------------------
+# Split by whole weeks
 
 weeks = sorted(
     df["race_week"].unique()
@@ -145,9 +137,7 @@ print(
 )
 
 
-# --------------------------------
-# TRAIN RANDOM FOREST CLASSIFIER
-# --------------------------------
+# Train random forest classifier
 
 model = RandomForestClassifier(
     n_estimators=300,
@@ -162,18 +152,14 @@ model.fit(
 )
 
 
-# --------------------------------
-# PREDICT PROBABILITIES
-# --------------------------------
+# Predict probabilities
 
 probabilities = model.predict_proba(
     X_test
 )[:, 1]
 
 
-# --------------------------------
-# TEST MULTIPLE THRESHOLDS
-# --------------------------------
+# Test multiple thresholds
 
 thresholds = [
     0.40,

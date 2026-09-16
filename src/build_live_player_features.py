@@ -6,9 +6,7 @@ from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
 
-# ================================================================
-# CONFIGURATION
-# ================================================================
+# Configuration
 
 load_dotenv()
 
@@ -29,9 +27,7 @@ engine = create_engine(
 )
 
 
-# ================================================================
-# LOAD HISTORICAL PLAYER-WAR DATA
-# ================================================================
+# Load historical player-war data
 
 history_query = """
 SELECT
@@ -67,9 +63,7 @@ print(
 )
 
 
-# ================================================================
-# BASIC HISTORICAL FEATURES
-# ================================================================
+# Basic historical features
 
 history["fame"] = pd.to_numeric(
     history["fame"],
@@ -110,9 +104,7 @@ history["full_participation"] = (
 ).astype(int)
 
 
-# ================================================================
-# BUILD ONE FEATURE ROW PER PLAYER
-# ================================================================
+# Build one feature row per player
 
 feature_rows = []
 
@@ -228,9 +220,7 @@ print(
 )
 
 
-# ================================================================
-# LOAD GK PLAYER ARCHETYPES
-# ================================================================
+# Load GK player archetypes
 
 if os.path.exists(
     ARCHETYPE_FILE
@@ -275,9 +265,7 @@ print(
 )
 
 
-# ================================================================
-# GET LATEST LIVE RACE
-# ================================================================
+# Get latest live race
 
 latest_race_query = """
 SELECT
@@ -305,9 +293,7 @@ latest_live_race_id = (
 )
 
 
-# ================================================================
-# LOAD GK LIVE PLAYERS ONLY
-# ================================================================
+# Load GK live players only
 
 live_query = """
 SELECT
@@ -408,9 +394,7 @@ print(
 )
 
 
-# ================================================================
-# LOAD GK HISTORICAL CLAN CONTEXT
-# ================================================================
+# Load GK historical clan context
 
 clan_query = """
 SELECT
@@ -474,9 +458,7 @@ if not clan_history.empty:
         )
 
 
-# ================================================================
-# MERGE GK LIVE PLAYERS WITH HISTORY
-# ================================================================
+# Merge GK live players with history
 
 live_features = live_players.merge(
     player_features,
@@ -485,9 +467,7 @@ live_features = live_players.merge(
 )
 
 
-# ================================================================
-# ADD GK CLAN CONTEXT
-# ================================================================
+# Add GK clan context
 
 live_features[
     "previous_clan_score"
@@ -500,9 +480,7 @@ live_features[
 )
 
 
-# ================================================================
-# MERGE GK ARCHETYPES
-# ================================================================
+# Merge GK archetypes
 
 live_features = live_features.merge(
     archetypes,
@@ -522,9 +500,7 @@ live_features[
 )
 
 
-# ================================================================
-# PREDICTION TIERS
-# ================================================================
+# Prediction tiers
 
 feature_columns = [
     "last_3_avg_fame",
@@ -593,18 +569,14 @@ live_features.loc[
 ] = "ml_model"
 
 
-# ================================================================
-# GK ROTATION FLAG
-# ================================================================
+# GK rotation flag
 
 live_features[
     "rotation_eligible"
 ] = 1
 
 
-# ================================================================
-# SUMMARY
-# ================================================================
+# Summary
 
 eligible_count = int(
     live_features[
@@ -660,9 +632,7 @@ print(
 )
 
 
-# ================================================================
-# SAVE
-# ================================================================
+# Save
 
 live_features.to_csv(
     OUTPUT_FILE,

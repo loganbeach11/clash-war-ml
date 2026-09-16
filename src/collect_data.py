@@ -6,9 +6,7 @@ import mysql.connector
 from dotenv import load_dotenv
 
 
-# ================================================================
-# CONFIGURATION
-# ================================================================
+# Configuration
 
 load_dotenv()
 
@@ -48,9 +46,7 @@ HISTORY_SOURCE_CLAN_TAGS = [
 ]
 
 
-# ================================================================
-# GET HISTORICAL RIVER RACE DATA
-# ================================================================
+# Get historical River Race data
 
 all_races = {}
 
@@ -105,9 +101,7 @@ for history_clan_tag in HISTORY_SOURCE_CLAN_TAGS:
         len(clan_races)
     )
 
-    # ------------------------------------------------------------
-    # DEDUPLICATE OVERLAPPING RACES
-    # ------------------------------------------------------------
+# Deduplicate overlapping races
 
     for race in clan_races:
 
@@ -133,9 +127,7 @@ print(
 )
 
 
-# ================================================================
-# GET CURRENT RIVER RACE DATA
-# ================================================================
+# Get current River Race data
 
 current_race_url = (
     f"{BASE_URL}/clans/"
@@ -209,9 +201,7 @@ else:
     current_race_response.raise_for_status()
 
 
-# ================================================================
-# SORT HISTORICAL RACES
-# ================================================================
+# Sort historical races
 
 # Oldest -> newest.
 #
@@ -223,9 +213,7 @@ races = sorted(
 )
 
 
-# ================================================================
-# BUILD RECORD LISTS
-# ================================================================
+# Build record lists
 
 war_records = []
 clan_records = []
@@ -237,9 +225,7 @@ live_player_records = []
 live_member_records = []
 
 
-# ================================================================
-# PROCESS HISTORICAL RIVER RACES
-# ================================================================
+# Process historical River Races
 
 for race in races:
 
@@ -257,9 +243,7 @@ for race in races:
         race_date_raw
     ).to_pydatetime()
 
-    # ------------------------------------------------------------
-    # WAR RECORD
-    # ------------------------------------------------------------
+# War record
 
     war_records.append(
         {
@@ -270,9 +254,7 @@ for race in races:
         }
     )
 
-    # ------------------------------------------------------------
-    # EVERY CLAN IN THIS WAR
-    # ------------------------------------------------------------
+# Process each clan in the war
 
     for standing in race["standings"]:
 
@@ -314,9 +296,7 @@ for race in races:
             }
         )
 
-        # --------------------------------------------------------
-        # EVERY PLAYER IN THIS CLAN
-        # --------------------------------------------------------
+# Process each player in the clan
 
         participants = clan.get(
             "participants",
@@ -364,9 +344,7 @@ for race in races:
             )
 
 
-# ================================================================
-# ADD CLANS FROM THE LIVE RIVER RACE
-# ================================================================
+# Add clans from the live River Race
 
 if current_race_data is not None:
 
@@ -412,9 +390,7 @@ if current_race_data is not None:
             )
 
 
-# ================================================================
-# PROCESS CURRENT RIVER RACE PERIOD LOGS
-# ================================================================
+# Process current River Race period logs
 
 live_race_record = None
 
@@ -445,9 +421,7 @@ if current_race_data is not None:
         )
     )
 
-    # ------------------------------------------------------------
-    # CREATE A STABLE LIVE-RACE ID
-    # ------------------------------------------------------------
+# Create a stable live-race ID
 
     # periodIndex increases continuously through the season.
     # Dividing by 7 gives the week bucket.
@@ -501,9 +475,7 @@ if current_race_data is not None:
         "\nLive race ID:",
         live_race_id
     )
-    # ================================================================
-    # GET CURRENT CLAN ROSTERS
-    # ================================================================
+# Get current clan rosters
 
     for clan in live_clans:
 
@@ -570,9 +542,7 @@ if current_race_data is not None:
             )
 
     
-    # ------------------------------------------------------------
-    # BUILD LIVE PLAYER STATUS RECORDS
-    # ------------------------------------------------------------
+# Build live player status records
 
     for clan in live_clans:
 
@@ -626,9 +596,7 @@ if current_race_data is not None:
         "Live player records:",
         len(live_player_records)
     )
-    # ------------------------------------------------------------
-    # BUILD PERIOD RECORDS
-    # ------------------------------------------------------------
+# Build period records
 
     for period_log in period_logs:
 
@@ -729,9 +697,7 @@ if current_race_data is not None:
             )
 
 
-# ================================================================
-# BASIC DATA SUMMARY
-# ================================================================
+# Basic data summary
 
 print(
     "\nWar records:",
@@ -754,9 +720,7 @@ print(
 )
 
 
-# ================================================================
-# DUPLICATE PLAYER-WAR CHECK
-# ================================================================
+# Check duplicate player-war records
 
 performance_df = pd.DataFrame(
     performance_records
@@ -828,9 +792,7 @@ print(
 )
 
 
-# ================================================================
-# CONNECT TO MYSQL
-# ================================================================
+# Connect to MySQL
 
 db = mysql.connector.connect(
     host=DB_HOST,
@@ -847,9 +809,7 @@ print(
 )
 
 
-# ================================================================
-# 1. INSERT WARS
-# ================================================================
+# Insert wars
 
 war_sql = """
 INSERT INTO wars (
@@ -878,9 +838,7 @@ for record in war_records:
     )
 
 
-# ================================================================
-# 2. INSERT / UPDATE CLANS
-# ================================================================
+# Insert or update clans
 
 clan_sql = """
 INSERT INTO clans (
@@ -902,9 +860,7 @@ for record in clan_records:
         )
     )
 
-# ================================================================
-# 3. INSERT / UPDATE LIVE RACE
-# ================================================================
+# Insert or update live race
 
 if live_race_record is not None:
 
@@ -953,9 +909,7 @@ if live_race_record is not None:
         )
     )
 
-# ================================================================
-# 4. INSERT / UPDATE CURRENT CLAN MEMBERS
-# ================================================================
+# Insert or update current clan members
 
 if live_race_record is not None:
 
@@ -1007,9 +961,7 @@ if live_race_record is not None:
         )
 
 
-# ================================================================
-# 5. INSERT / UPDATE LIVE PLAYER WAR STATUS
-# ================================================================
+# Insert or update live player war status
 
 
 live_player_sql = """
@@ -1060,9 +1012,7 @@ for record in live_player_records:
         )
     )
 
-# ================================================================
-# 6. INSERT / UPDATE PLAYERS
-# ================================================================
+# Insert or update players
 
 player_sql = """
 INSERT INTO players (
@@ -1088,9 +1038,7 @@ for record in player_records:
     )
 
 
-# ================================================================
-# 7. INSERT CLAN WAR RESULTS
-# ================================================================
+# Insert clan war results
 
 clan_war_sql = """
 INSERT INTO clan_war_results (
@@ -1127,9 +1075,7 @@ for record in clan_war_records:
     )
 
 
-# ================================================================
-# 8. INSERT PLAYER WAR PERFORMANCE
-# ================================================================
+# Insert player war performance
 
 performance_sql = """
 INSERT INTO player_war_performance (
@@ -1165,9 +1111,7 @@ for record in performance_records:
     )
 
 
-# ================================================================
-# 9. INSERT CURRENT RIVER RACE PERIOD RESULTS
-# ================================================================
+# Insert current River Race period results
 
 period_sql = """
 INSERT INTO clan_war_period_results (
@@ -1234,9 +1178,7 @@ for record in period_records:
     )
 
 
-# ================================================================
-# SAVE DATABASE CHANGES
-# ================================================================
+# Save database changes
 
 db.commit()
 
@@ -1245,9 +1187,7 @@ print(
 )
 
 
-# ================================================================
-# VERIFY DATABASE COUNTS
-# ================================================================
+# Verify database counts
 
 cursor.execute(
     "SELECT COUNT(*) FROM players"
@@ -1371,9 +1311,7 @@ print(
     live_member_count
 )
 
-# ================================================================
-# CLOSE CONNECTION
-# ================================================================
+# Close connection
 
 cursor.close()
 db.close()

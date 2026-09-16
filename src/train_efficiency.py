@@ -8,9 +8,7 @@ from sklearn.metrics import (
 )
 
 
-# --------------------------------
-# LOAD DATA
-# --------------------------------
+# Load data
 
 df = pd.read_csv("data/model_dataset.csv")
 
@@ -19,9 +17,7 @@ df["race_date"] = pd.to_datetime(df["race_date"])
 df = df.sort_values("race_date")
 
 
-# --------------------------------
-# FEATURES
-# --------------------------------
+# Features
 
 feature_columns = [
     "last_3_avg_fame",
@@ -37,9 +33,7 @@ feature_columns = [
 ]
 
 
-# --------------------------------
-# KEEP ONLY ACTIVE PLAYERS
-# --------------------------------
+# Keep only active players
 
 active_df = df[df["decks_used"] > 0].copy()
 
@@ -51,9 +45,7 @@ active_df["fame_per_deck_target"] = (
 print("Active-player rows:", len(active_df))
 
 
-# --------------------------------
-# SPLIT BY WHOLE WARS
-# --------------------------------
+# Split by whole wars
 
 war_dates = sorted(active_df["race_date"].unique())
 
@@ -89,9 +81,7 @@ print(
 )
 
 
-# --------------------------------
-# TRAIN MODEL
-# --------------------------------
+# Train model
 
 X_train = train_df[feature_columns]
 y_train = train_df["fame_per_deck_target"]
@@ -112,18 +102,14 @@ model.fit(
 )
 
 
-# --------------------------------
-# PREDICT
-# --------------------------------
+# Predict
 
 predictions = model.predict(X_test)
 
 predictions = predictions.clip(min=0)
 
 
-# --------------------------------
-# EVALUATE
-# --------------------------------
+# Evaluate
 
 mae = mean_absolute_error(
     y_test,
@@ -150,9 +136,7 @@ print("RMSE:", rmse)
 print("R^2:", r2)
 
 
-# --------------------------------
-# SAMPLE RESULTS
-# --------------------------------
+# Sample results
 
 results = test_df[
     [

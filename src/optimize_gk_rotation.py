@@ -2,9 +2,7 @@ import pandas as pd
 import numpy as np
 
 
-# ================================================================
-# CONFIGURATION
-# ================================================================
+# Configuration
 
 INPUT_FILE = "data/gk_live_player_predictions.csv"
 
@@ -28,9 +26,7 @@ DAILY_LINEUP_SIZE = 50
 BATTLE_DAYS_PER_WEEK = 4
 
 
-# ================================================================
-# LOAD GK LIVE PLAYER PREDICTIONS
-# ================================================================
+# Load GK live player predictions
 
 gk = pd.read_csv(
     INPUT_FILE
@@ -90,9 +86,7 @@ print(
 )
 
 
-# ================================================================
-# CLEAN INPUT VALUES
-# ================================================================
+# Clean input values
 
 gk[
     "currently_member"
@@ -147,9 +141,7 @@ gk[
 )
 
 
-# ================================================================
-# EXPECTED-VALUE DAILY PERFORMANCE
-# ================================================================
+# Expected-value daily performance
 
 # final_predicted_fame reflects the current whole-war player forecast
 # with attendance uncertainty included.
@@ -166,9 +158,7 @@ gk[
 )
 
 
-# ================================================================
-# CONFIRMED-ACTIVE DAILY PERFORMANCE
-# ================================================================
+# Confirmed-active daily performance
 
 # For full-ML players, hard_predicted_fame represents production when
 # the participation model says they are active.
@@ -209,9 +199,7 @@ gk[
 )
 
 
-# ================================================================
-# RELIABILITY
-# ================================================================
+# Reliability
 
 gk[
     "reliability_score"
@@ -222,9 +210,7 @@ gk[
 )
 
 
-# ================================================================
-# SCORE 1: EXPECTED VALUE
-# ================================================================
+# Score 1: expected value
 
 # Expected production is primary.
 # Reliability is only a tiny deterministic tie-breaker.
@@ -244,9 +230,7 @@ gk[
 )
 
 
-# ================================================================
-# SCORE 2: CONFIRMED ACTIVE
-# ================================================================
+# Score 2: confirmed active
 
 # Once availability is known, active production is primary.
 # Reliability remains only a tiny tie-breaker.
@@ -266,9 +250,7 @@ gk[
 )
 
 
-# ================================================================
-# EXPECTED-VALUE RANKING
-# ================================================================
+# Expected-value ranking
 
 expected_ranking = (
     gk
@@ -313,9 +295,7 @@ expected_ranking[
 )
 
 
-# ================================================================
-# CONFIRMED-ACTIVE RANKING
-# ================================================================
+# Confirmed-active ranking
 
 active_ranking = (
     gk
@@ -360,9 +340,7 @@ active_ranking[
 )
 
 
-# ================================================================
-# MERGE BOTH RANKINGS
-# ================================================================
+# Merge both rankings
 
 comparison_columns = [
     "player_tag",
@@ -426,9 +404,7 @@ rank_comparison[
 )
 
 
-# ================================================================
-# LINEUP / BACKUP SETS
-# ================================================================
+# Lineup and backup sets
 
 expected_starters = (
     rank_comparison[
@@ -469,9 +445,7 @@ active_backups = (
 )
 
 
-# ================================================================
-# VALIDATION
-# ================================================================
+# Validation
 
 if len(
     gk
@@ -496,9 +470,7 @@ if len(
         )
 
 
-# ================================================================
-# SUMMARY METRICS
-# ================================================================
+# Summary metrics
 
 expected_daily_total = float(
     expected_starters[
@@ -587,9 +559,7 @@ summary = pd.DataFrame(
 )
 
 
-# ================================================================
-# TERMINAL OUTPUT
-# ================================================================
+# Terminal output
 
 print(
     "\nGK ROTATION OPTIMIZATION"
@@ -695,9 +665,7 @@ print(
 )
 
 
-# ================================================================
-# ARCHETYPE BREAKDOWN
-# ================================================================
+# Archetype breakdown
 
 if (
     "archetype_name"
@@ -720,9 +688,7 @@ if (
     )
 
 
-# ================================================================
-# BIGGEST RISERS
-# ================================================================
+# Biggest risers
 
 print(
     "\nBIGGEST RISERS IF CONFIRMED AVAILABLE"
@@ -784,9 +750,7 @@ print(
 )
 
 
-# ================================================================
-# CONFIRMED-ACTIVE RECOMMENDED 50
-# ================================================================
+# Confirmed-active recommended 50
 
 print(
     "\nCONFIRMED-ACTIVE RECOMMENDED 50"
@@ -857,9 +821,7 @@ print(
 )
 
 
-# ================================================================
-# TOP BACKUPS
-# ================================================================
+# Top backups
 
 print(
     "\nACTIVE-LINEUP TOP 10 BACKUPS"
@@ -908,9 +870,7 @@ print(
 )
 
 
-# ================================================================
-# SAVE
-# ================================================================
+# Save
 
 expected_starters.to_csv(
     EXPECTED_LINEUP_OUTPUT,

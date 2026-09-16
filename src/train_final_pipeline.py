@@ -11,9 +11,7 @@ from sklearn.metrics import (
 )
 
 
-# --------------------------------
-# LOAD DATA
-# --------------------------------
+# Load data
 
 df = pd.read_csv(
     "data/model_dataset.csv"
@@ -37,9 +35,7 @@ df = df.sort_values(
 )
 
 
-# --------------------------------
-# FEATURES
-# --------------------------------
+# Features
 
 feature_columns = [
     # Player history
@@ -61,9 +57,7 @@ feature_columns = [
 ]
 
 
-# --------------------------------
-# SPLIT BY WHOLE WEEKS
-# --------------------------------
+# Split by whole weeks
 
 weeks = sorted(
     df["race_week"].unique()
@@ -119,9 +113,7 @@ print(
 )
 
 
-# ================================================================
-# STAGE 1: PARTICIPATION CLASSIFIER
-# ================================================================
+# Stage 1: participation classifier
 
 train_df["participated_target"] = (
     train_df["decks_used"] > 0
@@ -167,9 +159,7 @@ predicted_participation = (
 ).astype(int)
 
 
-# ================================================================
-# STAGE 2: ACTIVE-PLAYER DECK MODEL
-# ================================================================
+# Stage 2: active-player deck model
 
 active_train_df = train_df[
     train_df["decks_used"] > 0
@@ -208,9 +198,7 @@ predicted_active_decks = (
 )
 
 
-# ================================================================
-# STAGE 3: RECENT EFFICIENCY
-# ================================================================
+# Stage 3: recent efficiency
 
 predicted_efficiency = (
     test_df[
@@ -219,9 +207,7 @@ predicted_efficiency = (
 )
 
 
-# ================================================================
-# HARD-THRESHOLD FAME PREDICTION
-# ================================================================
+# Hard-threshold fame prediction
 
 hard_predicted_fame = (
     predicted_participation
@@ -230,9 +216,7 @@ hard_predicted_fame = (
 )
 
 
-# ================================================================
-# PROBABILITY-WEIGHTED EXPECTED FAME
-# ================================================================
+# Probability-weighted expected fame
 
 expected_predicted_fame = (
     participation_probability
@@ -241,9 +225,7 @@ expected_predicted_fame = (
 )
 
 
-# ================================================================
-# EVALUATE HARD-THRESHOLD VERSION
-# ================================================================
+# Evaluate hard-threshold version
 
 actual_fame = test_df[
     "fame"
@@ -288,9 +270,7 @@ print(
 )
 
 
-# ================================================================
-# EVALUATE EXPECTED-VALUE VERSION
-# ================================================================
+# Evaluate expected-value version
 
 expected_mae = mean_absolute_error(
     actual_fame,
@@ -330,9 +310,7 @@ print(
 )
 
 
-# ================================================================
-# SAMPLE RESULTS
-# ================================================================
+# Sample results
 
 results = test_df[
     [
@@ -369,9 +347,7 @@ results[
 ] = expected_predicted_fame
 
 
-# --------------------------------
-# SAVE PLAYER PREDICTIONS
-# --------------------------------
+# Save player predictions
 
 prediction_output = test_df[
     [

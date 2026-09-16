@@ -7,9 +7,7 @@ import pandas as pd
 from dotenv import load_dotenv
 
 
-# ================================================================
-# CONFIGURATION
-# ================================================================
+# Configuration
 
 load_dotenv()
 
@@ -34,9 +32,7 @@ DAY_OUTPUT_FILE = "data/gk_live_war_day_projection.csv"
 WAR_OUTPUT_FILE = "data/gk_live_war_projection.csv"
 
 
-# ================================================================
-# HELPERS
-# ================================================================
+# Helpers
 
 def safe_float(value, default=0.0):
 
@@ -78,9 +74,7 @@ def historical_mode(series):
     return float(clean.median())
 
 
-# ================================================================
-# LOAD LIVE PLAYER PREDICTIONS — GK ONLY
-# ================================================================
+# Load GK live player predictions
 
 predictions = pd.read_csv(
     PLAYER_PREDICTIONS_FILE
@@ -139,9 +133,7 @@ print(
 )
 
 
-# ================================================================
-# LOAD GK HISTORICAL DAILY / RACE DATA
-# ================================================================
+# Load GK historical daily and race data
 
 gk_daily_history = load_optional_csv(
     GK_DAILY_HISTORY_FILE
@@ -172,9 +164,7 @@ if not gk_daily_history.empty:
             )
 
 
-# ================================================================
-# CONNECT TO MYSQL
-# ================================================================
+# Connect to MySQL
 
 db = mysql.connector.connect(
     host=DB_HOST,
@@ -189,9 +179,7 @@ cursor = db.cursor(
 )
 
 
-# ================================================================
-# GET CURRENT LIVE RACE
-# ================================================================
+# Get current live race
 
 cursor.execute(
     """
@@ -257,9 +245,7 @@ is_colosseum = (
 )
 
 
-# ================================================================
-# DETERMINE CURRENT BATTLE DAY
-# ================================================================
+# Determine current Battle Day
 
 # periodIndex % 7:
 #
@@ -319,9 +305,7 @@ print(
 )
 
 
-# ================================================================
-# CURRENT GK ROSTER COUNT
-# ================================================================
+# Current GK roster count
 
 cursor.execute(
     """
@@ -353,9 +337,7 @@ current_members = int(
 )
 
 
-# ================================================================
-# LOAD CURRENT WEEK GK PERIOD LOGS ONLY
-# ================================================================
+# Load current-week GK period logs
 
 cursor.execute(
     """
@@ -423,9 +405,7 @@ else:
             )
 
 
-# ================================================================
-# PLAYER-BASED GK DAILY PRODUCTION FORECAST
-# ================================================================
+# Player-based GK daily production forecast
 
 # This is still the current player-model estimate of GK's Medal
 # production. It is not treated as River movement or final place.
@@ -511,9 +491,7 @@ forecast_pool_players = int(
 )
 
 
-# ================================================================
-# HISTORICAL GK RIVER-RACE BASELINES
-# ================================================================
+# Historical GK River Race baselines
 
 normal_daily_history = pd.DataFrame()
 
@@ -672,9 +650,7 @@ def get_gk_historical_baseline(
     return baseline
 
 
-# ================================================================
-# LOOK UP CURRENT-WEEK DAY ROW
-# ================================================================
+# Look up current-week day row
 
 def get_period_row(
     battle_day,
@@ -698,9 +674,7 @@ def get_period_row(
     return rows.iloc[0]
 
 
-# ================================================================
-# BUILD GK DAY-BY-DAY FORECAST
-# ================================================================
+# Build GK day-by-day forecast
 
 daily_rows = []
 
@@ -798,9 +772,7 @@ for battle_day in range(
     )
 
 
-    # ------------------------------------------------------------
-    # IF GK ALREADY FINISHED, DAY 4 (OR LATER) NO LONGER MATTERS
-    # ------------------------------------------------------------
+# Skip later days after GK finishes
 
     if (
         projected_finish_day is not None
@@ -868,9 +840,7 @@ for battle_day in range(
         continue
 
 
-    # ------------------------------------------------------------
-    # MEDALS
-    # ------------------------------------------------------------
+# Medals
 
     if is_completed:
 
@@ -920,9 +890,7 @@ for battle_day in range(
     )
 
 
-    # ------------------------------------------------------------
-    # COLOSSEUM
-    # ------------------------------------------------------------
+# Colosseum
 
     if is_colosseum:
 
@@ -934,9 +902,7 @@ for battle_day in range(
         finished_after_day = False
 
 
-    # ------------------------------------------------------------
-    # NORMAL RIVER RACE — COMPLETED ACTUAL DAY
-    # ------------------------------------------------------------
+# Normal River Race: completed day
 
     elif is_completed:
 
@@ -1001,9 +967,7 @@ for battle_day in range(
             )
 
 
-    # ------------------------------------------------------------
-    # NORMAL RIVER RACE — FUTURE / IN-PROGRESS DAY
-    # ------------------------------------------------------------
+# Normal River Race: future or in-progress day
 
     else:
 
@@ -1144,9 +1108,7 @@ daily_projection = pd.DataFrame(
 )
 
 
-# ================================================================
-# HISTORICAL GK RACE CONTEXT
-# ================================================================
+# Historical GK race context
 
 historical_finished_by_day_3_rate = np.nan
 historical_avg_finish_day = np.nan
@@ -1246,9 +1208,7 @@ if not gk_race_history.empty:
             )
 
 
-# ================================================================
-# FINAL GK WAR SUMMARY
-# ================================================================
+# Final GK war summary
 
 if is_colosseum:
 
@@ -1357,9 +1317,7 @@ war_projection = pd.DataFrame(
 )
 
 
-# ================================================================
-# ROUND DISPLAY VALUES
-# ================================================================
+# Round display values
 
 for column in [
     "actual_medals",
@@ -1398,9 +1356,7 @@ for column in [
         ).round(4)
 
 
-# ================================================================
-# OUTPUT
-# ================================================================
+# Output
 
 print(
     "\nGALACTIC KINGS DAY-BY-DAY PROJECTION"
@@ -1486,9 +1442,7 @@ if (
     )
 
 
-# ================================================================
-# SAVE
-# ================================================================
+# Save
 
 predictions.to_csv(
     PLAYER_OUTPUT_FILE,
@@ -1523,9 +1477,7 @@ print(
 )
 
 
-# ================================================================
-# CLOSE DATABASE
-# ================================================================
+# Close database
 
 cursor.close()
 db.close()

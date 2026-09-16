@@ -16,9 +16,7 @@ engine = create_engine(
     f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 
-# --------------------------------
-# LOAD PLAYER-WAR DATA
-# --------------------------------
+# Load player-war data
 
 # Combine cases where a player appeared in more than one clan
 # during the same River Race into one player-war observation.
@@ -83,9 +81,7 @@ df = pd.read_sql(query, engine)
 print(df.head(20))
 print("\nShape:", df.shape)
 
-# --------------------------------
-# LOAD CLAN-WAR HISTORY
-# --------------------------------
+# Load clan-war history
 
 clan_query = """
 SELECT
@@ -107,9 +103,7 @@ clan_df = pd.read_sql(
     engine
 )
 
-# --------------------------------
-# BUILD CLAN HISTORY FEATURES
-# --------------------------------
+# Build clan history features
 
 clan_groups = clan_df.groupby(
     "clan_tag"
@@ -169,9 +163,7 @@ clan_feature_df = clan_df[
     ]
 ].copy()
 
-# --------------------------------
-# MERGE CLAN FEATURES INTO PLAYERS
-# --------------------------------
+# Merge clan features into players
 
 df = df.merge(
     clan_feature_df,
@@ -182,9 +174,7 @@ df = df.merge(
     how="left"
 )
 
-# --------------------------------
-# BASIC FEATURE ENGINEERING
-# --------------------------------
+# Basic feature engineering
 
 # Fame earned per deck.
 # Players who did not participate get 0.
@@ -205,15 +195,11 @@ df["participated"] = (
     df["decks_used"] > 0
 ).astype(int)
 
-# --------------------------------
-# PLAYER GROUPS
-# --------------------------------
+# Player groups
 
 player_groups = df.groupby("player_tag")
 
-# --------------------------------
-# ROLLING HISTORICAL FEATURES
-# --------------------------------
+# Rolling historical features
 
 # Average fame over previous 3 wars.
 df["last_3_avg_fame"] = (
@@ -260,9 +246,7 @@ df["last_3_avg_efficiency"] = (
     )
 )
 
-# --------------------------------
-# PARTICIPATION FEATURES
-# --------------------------------
+# Participation features
 
 # Percentage of previous 5 wars in which
 # the player used at least one deck.
@@ -316,9 +300,7 @@ df["recent_active_wars"] = (
     )
 )
 
-# --------------------------------
-# PREVIOUS WAR FEATURES
-# --------------------------------
+# Previous war features
 
 df["previous_war_fame"] = (
     player_groups["fame"]
@@ -330,9 +312,7 @@ df["previous_war_decks"] = (
     .shift(1)
 )
 
-# --------------------------------
-# TREND FEATURES
-# --------------------------------
+# Trend features
 
 # Change in fame from two wars ago
 # to the previous war.
@@ -354,9 +334,7 @@ df["decks_change"] = (
     - player_groups["decks_used"].shift(2)
 )
 
-# --------------------------------
-# CONSISTENCY FEATURES
-# --------------------------------
+# Consistency features
 
 # Standard deviation of fame over previous 3 wars.
 # Lower = more consistent.
@@ -382,9 +360,7 @@ df["last_3_decks_std"] = (
     )
 )
 
-# --------------------------------
-# SANITY CHECK: LOGAN
-# --------------------------------
+# Sanity check: Logan
 
 logan = df[
     df["player_tag"] == "#8RQCGY8CQ"
@@ -419,9 +395,7 @@ print(
     ].to_string(index=False)
 )
 
-# --------------------------------
-# BUILD ML-READY DATASET
-# --------------------------------
+# Build ML-ready dataset
 
 # Number of historical wars that occurred before
 # each player-war observation.
@@ -435,9 +409,7 @@ model_df = df[
     df["previous_wars_count"] >= 3
 ].copy()
 
-# --------------------------------
-# MODEL FEATURES
-# --------------------------------
+# Model features
 
 feature_columns = [
     "last_3_avg_fame",
@@ -471,9 +443,7 @@ model_df = model_df.dropna(
     subset=feature_columns + [target_column]
 )
 
-# --------------------------------
-# OUTPUT
-# --------------------------------
+# Output
 
 print("\nML-ready dataset shape:")
 print(model_df.shape)

@@ -9,9 +9,7 @@ from sklearn.metrics import (
 )
 
 
-# --------------------------------
-# LOAD DATA
-# --------------------------------
+# Load data
 
 df = pd.read_csv(
     "data/model_dataset.csv"
@@ -35,9 +33,7 @@ df = df.sort_values(
 )
 
 
-# --------------------------------
-# FEATURES
-# --------------------------------
+# Features
 
 feature_columns = [
     # Player history
@@ -59,9 +55,7 @@ feature_columns = [
 ]
 
 
-# --------------------------------
-# KEEP ONLY ACTIVE PLAYERS
-# --------------------------------
+# Keep only active players
 
 active_df = df[
     df["decks_used"] > 0
@@ -73,9 +67,7 @@ print(
 )
 
 
-# --------------------------------
-# SPLIT BY WHOLE WEEKS
-# --------------------------------
+# Split by whole weeks
 
 weeks = sorted(
     active_df["race_week"].unique()
@@ -131,9 +123,7 @@ print(
 )
 
 
-# --------------------------------
-# TRAIN MODEL
-# --------------------------------
+# Train model
 
 X_train = train_df[
     feature_columns
@@ -163,9 +153,7 @@ model.fit(
 )
 
 
-# --------------------------------
-# RAW PREDICTIONS
-# --------------------------------
+# Raw predictions
 
 raw_predictions = model.predict(
     X_test
@@ -177,9 +165,7 @@ raw_predictions = raw_predictions.clip(
 )
 
 
-# --------------------------------
-# ROUND TO REALISTIC DECK VALUES
-# --------------------------------
+# Round to realistic deck values
 
 allowed_decks = np.array(
     [
@@ -204,9 +190,7 @@ rounded_predictions = np.array(
 )
 
 
-# --------------------------------
-# EVALUATE RAW MODEL
-# --------------------------------
+# Evaluate raw model
 
 raw_mae = mean_absolute_error(
     y_test,
@@ -245,9 +229,7 @@ print(
 )
 
 
-# --------------------------------
-# EVALUATE ROUNDED MODEL
-# --------------------------------
+# Evaluate rounded model
 
 rounded_mae = mean_absolute_error(
     y_test,
@@ -286,9 +268,7 @@ print(
 )
 
 
-# --------------------------------
-# SAMPLE RESULTS
-# --------------------------------
+# Sample results
 
 results = test_df[
     [

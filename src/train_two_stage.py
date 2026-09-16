@@ -8,9 +8,7 @@ from sklearn.metrics import (
 )
 
 
-# --------------------------------
-# LOAD DATA
-# --------------------------------
+# Load data
 
 df = pd.read_csv("data/model_dataset.csv")
 
@@ -19,9 +17,7 @@ df["race_date"] = pd.to_datetime(df["race_date"])
 df = df.sort_values("race_date")
 
 
-# --------------------------------
-# FEATURES
-# --------------------------------
+# Features
 
 feature_columns = [
     "last_3_avg_fame",
@@ -37,9 +33,7 @@ feature_columns = [
 ]
 
 
-# --------------------------------
-# TIME-BASED SPLIT BY WHOLE WARS
-# --------------------------------
+# Time-based split by whole wars
 
 war_dates = sorted(df["race_date"].unique())
 
@@ -69,9 +63,7 @@ print(
 )
 
 
-# ================================================================
-# MODEL 1: PREDICT DECKS USED
-# ================================================================
+# Model 1: predict decks used
 
 X_train_decks = train_df[feature_columns]
 y_train_decks = train_df["decks_used"]
@@ -96,9 +88,7 @@ predicted_decks = decks_model.predict(X_test_decks)
 
 # Deck usage must stay between 0 and 16
 predicted_decks = predicted_decks.clip(0, 16)
-# --------------------------------
-# EVALUATE DECK MODEL
-# --------------------------------
+# Evaluate deck model
 
 decks_mae = mean_absolute_error(
     y_test_decks,
@@ -123,9 +113,7 @@ print("MAE:", decks_mae)
 print("RMSE:", decks_rmse)
 print("R^2:", decks_r2)
 
-# ================================================================
-# MODEL 2: PREDICT FAME PER DECK
-# ================================================================
+# Model 2: predict fame per deck
 
 # Only train this model on wars where the player actually played
 active_train_df = train_df[
@@ -156,9 +144,7 @@ efficiency_model.fit(
     y_train_efficiency
 )
 
-# --------------------------------
-# PREDICT EFFICIENCY FOR ALL TEST PLAYERS
-# --------------------------------
+# Predict efficiency for all test players
 
 predicted_efficiency = efficiency_model.predict(
     test_df[feature_columns]
@@ -169,9 +155,7 @@ predicted_efficiency = efficiency_model.predict(
 predicted_efficiency = predicted_efficiency.clip(min=0)
 
 
-# ================================================================
-# COMBINE BOTH MODELS
-# ================================================================
+# Combine both models
 
 predicted_fame = (
     predicted_decks
@@ -179,9 +163,7 @@ predicted_fame = (
 )
 
 
-# --------------------------------
-# FINAL FAME EVALUATION
-# --------------------------------
+# Final fame evaluation
 
 actual_fame = test_df["fame"]
 
@@ -209,9 +191,7 @@ print("RMSE:", fame_rmse)
 print("R^2:", fame_r2)
 
 
-# --------------------------------
-# SAMPLE PREDICTIONS
-# --------------------------------
+# Sample predictions
 
 results = test_df[
     [

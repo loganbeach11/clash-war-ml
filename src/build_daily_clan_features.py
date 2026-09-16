@@ -7,9 +7,7 @@ from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
 
-# ================================================================
-# CONFIGURATION
-# ================================================================
+# Configuration
 
 load_dotenv()
 
@@ -28,9 +26,7 @@ engine = create_engine(
 )
 
 
-# ================================================================
-# LOAD GALACTIC KINGS DAILY PERIOD RESULTS
-# ================================================================
+# Load Galactic Kings daily period results
 
 query = """
 SELECT
@@ -78,9 +74,7 @@ if df.empty:
     )
 
 
-# ================================================================
-# KEEP ONLY BATTLE DAYS
-# ================================================================
+# Keep only Battle Days
 
 df["period_position"] = (
     pd.to_numeric(
@@ -98,9 +92,7 @@ df = df[
 ].copy()
 
 
-# ================================================================
-# REMOVE UNFINISHED DAYS
-# ================================================================
+# Remove unfinished days
 
 df["end_of_day_rank"] = pd.to_numeric(
     df["end_of_day_rank"],
@@ -120,9 +112,7 @@ print(
 )
 
 
-# ================================================================
-# NORMALIZE NUMERIC COLUMNS
-# ================================================================
+# Normalize numeric columns
 
 numeric_columns = [
     "section_index",
@@ -145,11 +135,9 @@ for column in numeric_columns:
         )
 
 
-# ================================================================
-# BATTLE DAY NUMBER
-# ================================================================
+# Battle Day number
 
-# periodIndex % 7:
+# Battle Day mapping from period_index % 7:
 #
 # 3 = Battle Day 1
 # 4 = Battle Day 2
@@ -162,9 +150,7 @@ df["battle_day"] = (
 ).astype(int)
 
 
-# ================================================================
-# WAR MODE
-# ================================================================
+# War mode
 
 df["war_mode"] = (
     df["period_type"]
@@ -180,11 +166,9 @@ df["is_colosseum"] = (
 )
 
 
-# ================================================================
-# HUMAN-READABLE DAILY RANK
-# ================================================================
+# Human-readable daily rank
 
-# API rank is 0-based.
+# API rank is zero-based.
 #
 # 0 = 1st
 # 1 = 2nd
@@ -196,9 +180,7 @@ df["daily_place"] = (
 ).astype(int)
 
 
-# ================================================================
-# RIVER MOVEMENT
-# ================================================================
+# River movement
 
 df["rank_movement"] = (
     df["progress_earned"]
@@ -216,9 +198,7 @@ df["total_movement_earned"] = (
 )
 
 
-# ================================================================
-# RIVER FINISH STATUS
-# ================================================================
+# River finish status
 
 # Colosseum does not use River Race movement / finish line.
 #
@@ -235,9 +215,7 @@ df["finished_after_day"] = (
 )
 
 
-# ================================================================
-# IDENTIFY FIRST FINISH DAY PER RACE
-# ================================================================
+# Identify first finish day per race
 
 finish_day_lookup = (
     df[
@@ -271,9 +249,7 @@ df["race_finished_by_day_3"] = (
 )
 
 
-# ================================================================
-# LOAD GK PLAYER-DAY PARTICIPATION
-# ================================================================
+# Load GK player-day participation
 
 # live_player_war_status stores cumulative war state for the live race,
 # not a clean historical player-day fact table.
@@ -320,9 +296,7 @@ if not player_status.empty:
         ).fillna(0)
 
 
-# ================================================================
-# CURRENT LIVE-RACE PLAYER CONTEXT
-# ================================================================
+# Current live-race player context
 
 # We only attach these fields to rows where the live race IDs match.
 # This avoids pretending we have historical player-day participation
@@ -374,13 +348,11 @@ else:
     df["race_total_fame_seen"] = np.nan
 
 
-# ================================================================
-# DAILY EFFICIENCY
-# ================================================================
+# Daily efficiency
 
 # At the clan/day level:
 #
-# medals per point of river movement is not meaningful.
+# Medals per point of River movement is not meaningful.
 # A better current daily efficiency indicator is medals earned per
 # rank-movement unit only for analysis, but we keep the clearer raw
 # fields instead of inventing a composite score.
@@ -397,9 +369,7 @@ df["defense_movement_share"] = np.where(
 )
 
 
-# ================================================================
-# GK HISTORY WITHIN EACH RACE
-# ================================================================
+# GK history within each race
 
 groups = df.groupby(
     "live_race_id",
@@ -478,9 +448,7 @@ df["avg_previous_total_movement"] = (
 )
 
 
-# ================================================================
-# CROSS-RACE GK HISTORICAL FEATURES
-# ================================================================
+# Cross-race GK historical features
 
 # These are shifted so every row only sees older GK Battle Days.
 
@@ -539,13 +507,11 @@ df["gk_last_3_day_avg_movement"] = (
 )
 
 
-# ================================================================
-# BATTLE-DAY-SPECIFIC HISTORICAL BASELINES
-# ================================================================
+# Battle-Day-specific historical baselines
 
 # Example:
-# before today's Day 2 row, what has GK historically averaged on
-# previous Day 2s?
+# Before today's Day 2 row, calculate what GK historically averaged on
+# previous Day 2s.
 
 df["gk_previous_same_day_avg_points"] = (
     df.groupby(
@@ -592,9 +558,7 @@ df["gk_previous_same_day_avg_movement"] = (
 )
 
 
-# ================================================================
-# RACE-LEVEL SUMMARY
-# ================================================================
+# Race-level summary
 
 race_summary = (
     df.groupby(
@@ -678,9 +642,7 @@ race_summary["finished_by_day_3"] = (
 )
 
 
-# ================================================================
-# OVERALL GK SUMMARY
-# ================================================================
+# Overall GK summary
 
 normal_race_summary = race_summary[
     ~race_summary[
@@ -752,9 +714,7 @@ if not normal_race_summary.empty:
         )
 
 
-# ================================================================
-# DISPLAY DAILY DATA
-# ================================================================
+# Display daily data
 
 display_columns = [
     "live_race_id",
@@ -790,9 +750,7 @@ print(
 )
 
 
-# ================================================================
-# SAVE DATASETS
-# ================================================================
+# Save datasets
 
 df.to_csv(
     "data/gk_daily_war_dataset.csv",
