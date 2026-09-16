@@ -1,0 +1,1809 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+    Clash Royale War Analytics
+</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    background:
+        #0f172a;
+
+    color:
+        #e2e8f0;
+}
+
+.container {
+    width:
+        min(
+            1450px,
+            94%
+        );
+
+    margin:
+        0 auto;
+
+    padding:
+        36px
+        0
+        70px;
+}
+
+.hero {
+    padding:
+        36px;
+
+    border-radius:
+        22px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #1e293b,
+            #172554
+        );
+
+    margin-bottom:
+        24px;
+
+    box-shadow:
+        0
+        18px
+        50px
+        rgba(
+            0,
+            0,
+            0,
+            0.28
+        );
+}
+
+.hero-top {
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        flex-start;
+
+    gap:
+        20px;
+}
+
+.hero h1 {
+    margin:
+        0
+        0
+        8px;
+
+    font-size:
+        38px;
+}
+
+.hero p {
+    margin:
+        0;
+
+    color:
+        #94a3b8;
+}
+
+.mode-badge {
+    display:
+        inline-block;
+
+    padding:
+        8px
+        13px;
+
+    border-radius:
+        999px;
+
+    background:
+        #2563eb;
+
+    font-size:
+        13px;
+
+    font-weight:
+        700;
+
+    white-space:
+        nowrap;
+}
+
+.cards {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(
+                190px,
+                1fr
+            )
+        );
+
+    gap:
+        16px;
+
+    margin:
+        24px
+        0;
+}
+
+.card {
+    background:
+        #1e293b;
+
+    border:
+        1px
+        solid
+        #334155;
+
+    border-radius:
+        16px;
+
+    padding:
+        20px;
+}
+
+.card-label {
+    color:
+        #94a3b8;
+
+    font-size:
+        13px;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        0.08em;
+}
+
+.card-value {
+    margin-top:
+        8px;
+
+    font-size:
+        30px;
+
+    font-weight:
+        700;
+}
+
+.compact-value {
+    font-size:
+        22px;
+}
+
+.section {
+    background:
+        #111827;
+
+    border:
+        1px
+        solid
+        #273449;
+
+    border-radius:
+        18px;
+
+    padding:
+        24px;
+
+    margin-top:
+        22px;
+
+    box-shadow:
+        0
+        12px
+        30px
+        rgba(
+            0,
+            0,
+            0,
+            0.18
+        );
+}
+
+.section h2 {
+    margin:
+        0
+        0
+        6px;
+
+    font-size:
+        23px;
+}
+
+.section p {
+    margin-top:
+        0;
+
+    color:
+        #94a3b8;
+}
+
+.two-column {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        22px;
+}
+
+.table-wrap {
+    overflow-x:
+        auto;
+
+    margin-top:
+        16px;
+}
+
+.data-table {
+    width:
+        100%;
+
+    border-collapse:
+        collapse;
+
+    font-size:
+        14px;
+}
+
+.data-table th {
+    background:
+        #1e293b;
+
+    color:
+        #cbd5e1;
+
+    text-align:
+        left;
+
+    padding:
+        12px;
+
+    border-bottom:
+        1px
+        solid
+        #334155;
+
+    white-space:
+        nowrap;
+}
+
+.data-table td {
+    padding:
+        11px
+        12px;
+
+    border-bottom:
+        1px
+        solid
+        #243244;
+
+    white-space:
+        nowrap;
+}
+
+.data-table tr:hover {
+    background:
+        #182235;
+}
+
+.note {
+    margin-top:
+        14px;
+
+    padding:
+        14px
+        16px;
+
+    border-radius:
+        12px;
+
+    background:
+        #172033;
+
+    color:
+        #94a3b8;
+
+    font-size:
+        13px;
+}
+
+.empty {
+    color:
+        #94a3b8;
+
+    padding:
+        16px
+        0;
+}
+
+.footer {
+    margin-top:
+        26px;
+
+    text-align:
+        center;
+
+    color:
+        #64748b;
+
+    font-size:
+        13px;
+}
+
+@media (
+    max-width:
+        900px
+) {
+
+    .two-column {
+        grid-template-columns:
+            1fr;
+    }
+
+    .hero-top {
+        display:
+            block;
+    }
+
+    .mode-badge {
+        margin-top:
+            16px;
+    }
+
+    .hero h1 {
+        font-size:
+            28px;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="hero">
+
+        <div class="hero-top">
+
+            <div>
+
+                <h1>
+                    Clash Royale War Analytics
+                </h1>
+
+                <p>
+                    Live River Race simulation, player archetypes, and Galactic Kings rotation optimization
+                </p>
+
+            </div>
+
+            <div class="mode-badge">
+                River Race
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="cards">
+
+        <div class="card">
+
+            <div class="card-label">
+                Live Players
+            </div>
+
+            <div class="card-value">
+                267
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-label">
+                Full ML Coverage
+            </div>
+
+            <div class="card-value">
+                236
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="card-label">
+                GK Rotation Pool
+            </div>
+
+            <div class="card-value">
+                73
+            </div>
+
+        </div>
+
+        
+    <div class="card">
+        <div class="card-label">
+            GK Projected Finish
+        </div>
+        <div class="card-value">
+            2nd
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-label">
+            GK Finish Day
+        </div>
+        <div class="card-value compact-value">
+            Not projected to finish
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-label">
+            GK River Progress
+        </div>
+        <div class="card-value compact-value">
+            7,200 / 10,000
+        </div>
+    </div>
+    
+
+    </div>
+
+
+    <div class="section">
+
+        <h2>
+            River Race Projection
+        </h2>
+
+        <p>
+            Projected River Race outcome based on daily Medal rank, River movement, defense movement, and the 10,000-point finish line.
+        </p>
+
+        <div class="table-wrap">
+
+            <table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Projected Place</th>
+      <th>Clan</th>
+      <th>Projected Medals</th>
+      <th>River Progress</th>
+      <th>Projected Finish</th>
+      <th>Expected Daily Players</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1st</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>124,251</td>
+      <td>10,000</td>
+      <td>Battle Day 4</td>
+      <td>46.4</td>
+    </tr>
+    <tr>
+      <td>2nd</td>
+      <td>Galactic Kings</td>
+      <td>115,922</td>
+      <td>7,200</td>
+      <td>Not projected to finish</td>
+      <td>50.0</td>
+    </tr>
+    <tr>
+      <td>3rd</td>
+      <td>37XU</td>
+      <td>105,010</td>
+      <td>4,000</td>
+      <td>Not projected to finish</td>
+      <td>41.3</td>
+    </tr>
+    <tr>
+      <td>4th</td>
+      <td>isao</td>
+      <td>94,654</td>
+      <td>2,400</td>
+      <td>Not projected to finish</td>
+      <td>33.5</td>
+    </tr>
+    <tr>
+      <td>5th</td>
+      <td>Gentleman Jack</td>
+      <td>90,497</td>
+      <td>1,600</td>
+      <td>Not projected to finish</td>
+      <td>32.3</td>
+    </tr>
+  </tbody>
+</table>
+
+        </div>
+
+    </div>
+
+
+    <div class="section">
+
+        <h2>
+            Galactic Kings — Day-by-Day
+        </h2>
+
+        <p>
+            Projected daily result for Galactic Kings.
+        </p>
+
+        <div class="table-wrap">
+
+            <table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Battle Day</th>
+      <th>Status</th>
+      <th>Projected Medals</th>
+      <th>Projected Rank</th>
+      <th>Rank Movement</th>
+      <th>Defense Bonus</th>
+      <th>River Position</th>
+      <th>Finished</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>future</td>
+      <td>28,980</td>
+      <td>2nd</td>
+      <td>1,800</td>
+      <td>0</td>
+      <td>1,800</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>future</td>
+      <td>28,980</td>
+      <td>2nd</td>
+      <td>1,800</td>
+      <td>0</td>
+      <td>3,600</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>future</td>
+      <td>28,980</td>
+      <td>2nd</td>
+      <td>1,800</td>
+      <td>0</td>
+      <td>5,400</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>future</td>
+      <td>28,980</td>
+      <td>2nd</td>
+      <td>1,800</td>
+      <td>0</td>
+      <td>7,200</td>
+      <td>No</td>
+    </tr>
+  </tbody>
+</table>
+
+        </div>
+
+    </div>
+
+
+    <div class="section">
+
+        <h2>
+            All Clans — Day-by-Day
+        </h2>
+
+        <p>
+            Daily projected Medal totals and competition result.
+        </p>
+
+        <div class="table-wrap">
+
+            <table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Battle Day</th>
+      <th>Clan</th>
+      <th>Status</th>
+      <th>Medals</th>
+      <th>Daily Rank</th>
+      <th>Rank Movement</th>
+      <th>Defense Bonus</th>
+      <th>River Position</th>
+      <th>Finished</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Gentleman Jack</td>
+      <td>future</td>
+      <td>22,624</td>
+      <td>5th</td>
+      <td>400</td>
+      <td>0</td>
+      <td>400</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>isao</td>
+      <td>future</td>
+      <td>23,663</td>
+      <td>4th</td>
+      <td>600</td>
+      <td>0</td>
+      <td>600</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>37XU</td>
+      <td>future</td>
+      <td>26,253</td>
+      <td>3rd</td>
+      <td>1,000</td>
+      <td>0</td>
+      <td>1,000</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Galactic Kings</td>
+      <td>future</td>
+      <td>28,980</td>
+      <td>2nd</td>
+      <td>1,800</td>
+      <td>0</td>
+      <td>1,800</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>future</td>
+      <td>31,063</td>
+      <td>1st</td>
+      <td>3,000</td>
+      <td>0</td>
+      <td>3,000</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Gentleman Jack</td>
+      <td>future</td>
+      <td>22,624</td>
+      <td>5th</td>
+      <td>400</td>
+      <td>0</td>
+      <td>800</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>isao</td>
+      <td>future</td>
+      <td>23,663</td>
+      <td>4th</td>
+      <td>600</td>
+      <td>0</td>
+      <td>1,200</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>37XU</td>
+      <td>future</td>
+      <td>26,253</td>
+      <td>3rd</td>
+      <td>1,000</td>
+      <td>0</td>
+      <td>2,000</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Galactic Kings</td>
+      <td>future</td>
+      <td>28,980</td>
+      <td>2nd</td>
+      <td>1,800</td>
+      <td>0</td>
+      <td>3,600</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>future</td>
+      <td>31,063</td>
+      <td>1st</td>
+      <td>3,000</td>
+      <td>0</td>
+      <td>6,000</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Gentleman Jack</td>
+      <td>future</td>
+      <td>22,624</td>
+      <td>5th</td>
+      <td>400</td>
+      <td>0</td>
+      <td>1,200</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>isao</td>
+      <td>future</td>
+      <td>23,663</td>
+      <td>4th</td>
+      <td>600</td>
+      <td>0</td>
+      <td>1,800</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>37XU</td>
+      <td>future</td>
+      <td>26,253</td>
+      <td>3rd</td>
+      <td>1,000</td>
+      <td>0</td>
+      <td>3,000</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Galactic Kings</td>
+      <td>future</td>
+      <td>28,980</td>
+      <td>2nd</td>
+      <td>1,800</td>
+      <td>0</td>
+      <td>5,400</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>future</td>
+      <td>31,063</td>
+      <td>1st</td>
+      <td>3,000</td>
+      <td>0</td>
+      <td>9,000</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Gentleman Jack</td>
+      <td>future</td>
+      <td>22,624</td>
+      <td>5th</td>
+      <td>400</td>
+      <td>0</td>
+      <td>1,600</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>isao</td>
+      <td>future</td>
+      <td>23,663</td>
+      <td>4th</td>
+      <td>600</td>
+      <td>0</td>
+      <td>2,400</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>37XU</td>
+      <td>future</td>
+      <td>26,253</td>
+      <td>3rd</td>
+      <td>1,000</td>
+      <td>0</td>
+      <td>4,000</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Galactic Kings</td>
+      <td>future</td>
+      <td>28,980</td>
+      <td>2nd</td>
+      <td>1,800</td>
+      <td>0</td>
+      <td>7,200</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>future</td>
+      <td>31,063</td>
+      <td>1st</td>
+      <td>3,000</td>
+      <td>0</td>
+      <td>10,000</td>
+      <td>Yes</td>
+    </tr>
+  </tbody>
+</table>
+
+        </div>
+
+    </div>
+
+
+    <div class="two-column">
+
+        <div class="section">
+
+            <h2>
+                Player Archetypes
+            </h2>
+
+            <p>
+                Unsupervised clustering of historical player behavior.
+            </p>
+
+            <div class="table-wrap">
+
+                <table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Archetype</th>
+      <th>Players</th>
+      <th>Avg Fame</th>
+      <th>Avg Decks</th>
+      <th>Participation</th>
+      <th>Full Participation</th>
+      <th>Fame / Deck</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Inconsistent Contributor</td>
+      <td>203</td>
+      <td>1,485.1</td>
+      <td>8.3</td>
+      <td>62%</td>
+      <td>36%</td>
+      <td>111.0</td>
+    </tr>
+    <tr>
+      <td>Reliable High Performer</td>
+      <td>123</td>
+      <td>2,606.9</td>
+      <td>15.0</td>
+      <td>100%</td>
+      <td>76%</td>
+      <td>174.6</td>
+    </tr>
+    <tr>
+      <td>Low-Participation Player</td>
+      <td>118</td>
+      <td>98.9</td>
+      <td>0.6</td>
+      <td>10%</td>
+      <td>1%</td>
+      <td>15.7</td>
+    </tr>
+  </tbody>
+</table>
+
+            </div>
+
+        </div>
+
+
+        <div class="section">
+
+            <h2>
+                Top Live Player Predictions
+            </h2>
+
+            <p>
+                Player-level performance model output.
+            </p>
+
+            <div class="table-wrap">
+
+                <table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Player</th>
+      <th>Clan</th>
+      <th>Archetype</th>
+      <th>Predicted Performance</th>
+      <th>Participation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ギソ内ヌソ</td>
+      <td>isao</td>
+      <td>Not Enough History</td>
+      <td>3,550</td>
+      <td>100%</td>
+    </tr>
+    <tr>
+      <td>AllanSilva</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Not Enough History</td>
+      <td>3,000</td>
+      <td>100%</td>
+    </tr>
+    <tr>
+      <td>THOORR</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Not Enough History</td>
+      <td>2,900</td>
+      <td>100%</td>
+    </tr>
+    <tr>
+      <td>rafa085</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Not Enough History</td>
+      <td>2,850</td>
+      <td>100%</td>
+    </tr>
+    <tr>
+      <td>TOMMY</td>
+      <td>37XU</td>
+      <td>Not Enough History</td>
+      <td>2,850</td>
+      <td>100%</td>
+    </tr>
+    <tr>
+      <td>Rodrigotd2</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Reliable High Performer</td>
+      <td>2,850</td>
+      <td>89%</td>
+    </tr>
+    <tr>
+      <td>bG</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Reliable High Performer</td>
+      <td>2,812</td>
+      <td>74%</td>
+    </tr>
+    <tr>
+      <td>MaTrK</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Reliable High Performer</td>
+      <td>2,803</td>
+      <td>98%</td>
+    </tr>
+    <tr>
+      <td>R7</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Reliable High Performer</td>
+      <td>2,774</td>
+      <td>98%</td>
+    </tr>
+    <tr>
+      <td>strakeey</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Not Enough History</td>
+      <td>2,751</td>
+      <td>95%</td>
+    </tr>
+    <tr>
+      <td>CECILI ON</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Reliable High Performer</td>
+      <td>2,735</td>
+      <td>82%</td>
+    </tr>
+    <tr>
+      <td>♤Chaelso♤</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Not Enough History</td>
+      <td>2,700</td>
+      <td>100%</td>
+    </tr>
+    <tr>
+      <td>pa_rmourao</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Reliable High Performer</td>
+      <td>2,695</td>
+      <td>96%</td>
+    </tr>
+    <tr>
+      <td>Minato Kushina</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Reliable High Performer</td>
+      <td>2,691</td>
+      <td>100%</td>
+    </tr>
+    <tr>
+      <td>⚽David</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Reliable High Performer</td>
+      <td>2,669</td>
+      <td>99%</td>
+    </tr>
+    <tr>
+      <td>CMG MK</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Reliable High Performer</td>
+      <td>2,666</td>
+      <td>86%</td>
+    </tr>
+    <tr>
+      <td>Paladino</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Reliable High Performer</td>
+      <td>2,665</td>
+      <td>98%</td>
+    </tr>
+    <tr>
+      <td>ANGELS ROYALE</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Reliable High Performer</td>
+      <td>2,657</td>
+      <td>99%</td>
+    </tr>
+    <tr>
+      <td>sabigol</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Reliable High Performer</td>
+      <td>2,657</td>
+      <td>96%</td>
+    </tr>
+    <tr>
+      <td>Lourd Game</td>
+      <td>ILLUMINATI 2.0</td>
+      <td>Reliable High Performer</td>
+      <td>2,639</td>
+      <td>99%</td>
+    </tr>
+  </tbody>
+</table>
+
+            </div>
+
+            <div class="note">
+                Player performance values are model inputs to the war
+                simulation. They are not the same thing as River movement
+                or final Clan War placement.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="section">
+
+        <h2>
+            Galactic Kings — Confirmed Active Lineup
+        </h2>
+
+        <p>
+            Recommended 50-player lineup assuming selected players are
+            confirmed available to participate.
+        </p>
+
+        <div class="table-wrap">
+
+            <table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Rank</th>
+      <th>Player</th>
+      <th>Currently In Clan</th>
+      <th>Archetype</th>
+      <th>Prediction Tier</th>
+      <th>Historical Participation</th>
+      <th>Expected Daily</th>
+      <th>Confirmed-Active Daily</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>15</td>
+      <td>E17</td>
+      <td>No</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>72%</td>
+      <td>569</td>
+      <td>586</td>
+    </tr>
+    <tr>
+      <td>36</td>
+      <td>Pątbøy²¹</td>
+      <td>Yes</td>
+      <td>Not Enough History</td>
+      <td>clan_baseline</td>
+      <td>66%</td>
+      <td>408</td>
+      <td>408</td>
+    </tr>
+    <tr>
+      <td>24</td>
+      <td>寒冰法師❦tzu</td>
+      <td>No</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>85%</td>
+      <td>527</td>
+      <td>550</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Drew62</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>87%</td>
+      <td>564</td>
+      <td>598</td>
+    </tr>
+    <tr>
+      <td>18</td>
+      <td>Alim</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>91%</td>
+      <td>535</td>
+      <td>575</td>
+    </tr>
+    <tr>
+      <td>19</td>
+      <td>Nadir</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>65%</td>
+      <td>556</td>
+      <td>569</td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td>『AL』L - in</td>
+      <td>Yes</td>
+      <td>Not Enough History</td>
+      <td>ml_model</td>
+      <td>81%</td>
+      <td>534</td>
+      <td>515</td>
+    </tr>
+    <tr>
+      <td>41</td>
+      <td>I AM SOO COOL</td>
+      <td>Yes</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>76%</td>
+      <td>402</td>
+      <td>384</td>
+    </tr>
+    <tr>
+      <td>37</td>
+      <td>hog rider</td>
+      <td>No</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>74%</td>
+      <td>346</td>
+      <td>408</td>
+    </tr>
+    <tr>
+      <td>22</td>
+      <td>Esdeath</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>86%</td>
+      <td>579</td>
+      <td>562</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>GK｜Logan</td>
+      <td>Yes</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>71%</td>
+      <td>551</td>
+      <td>664</td>
+    </tr>
+    <tr>
+      <td>20</td>
+      <td>shriyawn</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>84%</td>
+      <td>532</td>
+      <td>564</td>
+    </tr>
+    <tr>
+      <td>39</td>
+      <td>polski koks</td>
+      <td>Yes</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>63%</td>
+      <td>393</td>
+      <td>394</td>
+    </tr>
+    <tr>
+      <td>31</td>
+      <td>Akren</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>68%</td>
+      <td>528</td>
+      <td>533</td>
+    </tr>
+    <tr>
+      <td>25</td>
+      <td>JSN✨</td>
+      <td>Yes</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>85%</td>
+      <td>441</td>
+      <td>548</td>
+    </tr>
+    <tr>
+      <td>46</td>
+      <td>▁ ▂ ▃ ▄ ▅ ▆ █ Ⓓ</td>
+      <td>Yes</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>58%</td>
+      <td>400</td>
+      <td>349</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>aattcc</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>50%</td>
+      <td>571</td>
+      <td>635</td>
+    </tr>
+    <tr>
+      <td>30</td>
+      <td>LionGalaxy</td>
+      <td>No</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>90%</td>
+      <td>492</td>
+      <td>534</td>
+    </tr>
+    <tr>
+      <td>34</td>
+      <td>『PHX』Marcel✨Nay</td>
+      <td>No</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>54%</td>
+      <td>420</td>
+      <td>435</td>
+    </tr>
+    <tr>
+      <td>45</td>
+      <td>MuK｜⚡Leo⚡</td>
+      <td>No</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>51%</td>
+      <td>366</td>
+      <td>354</td>
+    </tr>
+    <tr>
+      <td>17</td>
+      <td>⭐PRO⭐</td>
+      <td>No</td>
+      <td>Not Enough History</td>
+      <td>limited_history</td>
+      <td>100%</td>
+      <td>575</td>
+      <td>575</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>❤️ Ana Luiza ❤️</td>
+      <td>Yes</td>
+      <td>Not Enough History</td>
+      <td>limited_history</td>
+      <td>100%</td>
+      <td>625</td>
+      <td>625</td>
+    </tr>
+    <tr>
+      <td>44</td>
+      <td>Don-Mehdi</td>
+      <td>No</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>60%</td>
+      <td>279</td>
+      <td>358</td>
+    </tr>
+    <tr>
+      <td>29</td>
+      <td>FF｜Soxee™</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>79%</td>
+      <td>562</td>
+      <td>537</td>
+    </tr>
+    <tr>
+      <td>38</td>
+      <td>syen</td>
+      <td>Yes</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>78%</td>
+      <td>451</td>
+      <td>407</td>
+    </tr>
+    <tr>
+      <td>23</td>
+      <td>Pindakaas</td>
+      <td>Yes</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>83%</td>
+      <td>467</td>
+      <td>561</td>
+    </tr>
+    <tr>
+      <td>21</td>
+      <td>AM♣️Joma</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>85%</td>
+      <td>522</td>
+      <td>564</td>
+    </tr>
+    <tr>
+      <td>48</td>
+      <td>Ryza</td>
+      <td>Yes</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>46%</td>
+      <td>352</td>
+      <td>344</td>
+    </tr>
+    <tr>
+      <td>47</td>
+      <td>主人｜Lou✨</td>
+      <td>Yes</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>47%</td>
+      <td>333</td>
+      <td>345</td>
+    </tr>
+    <tr>
+      <td>35</td>
+      <td>ABRAMMP3 JR</td>
+      <td>No</td>
+      <td>Not Enough History</td>
+      <td>limited_history</td>
+      <td>100%</td>
+      <td>431</td>
+      <td>431</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>Deadication</td>
+      <td>No</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>76%</td>
+      <td>569</td>
+      <td>595</td>
+    </tr>
+    <tr>
+      <td>42</td>
+      <td>Alsubaie</td>
+      <td>Yes</td>
+      <td>Not Enough History</td>
+      <td>ml_model</td>
+      <td>71%</td>
+      <td>365</td>
+      <td>377</td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td>BigRys</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>80%</td>
+      <td>563</td>
+      <td>588</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>The Jonkler</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>69%</td>
+      <td>586</td>
+      <td>576</td>
+    </tr>
+    <tr>
+      <td>27</td>
+      <td>LandShark</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>68%</td>
+      <td>489</td>
+      <td>538</td>
+    </tr>
+    <tr>
+      <td>28</td>
+      <td>ProB</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>69%</td>
+      <td>533</td>
+      <td>537</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>Cobrito❤️Moni</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>75%</td>
+      <td>553</td>
+      <td>597</td>
+    </tr>
+    <tr>
+      <td>26</td>
+      <td>Jenner8</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>77%</td>
+      <td>533</td>
+      <td>545</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>reaperwarrior</td>
+      <td>Yes</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>89%</td>
+      <td>541</td>
+      <td>593</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Storm</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>76%</td>
+      <td>652</td>
+      <td>666</td>
+    </tr>
+    <tr>
+      <td>50</td>
+      <td>Boozer✨️</td>
+      <td>No</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>70%</td>
+      <td>364</td>
+      <td>337</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>for nothing!</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>86%</td>
+      <td>571</td>
+      <td>596</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>⚡Agustin⚡</td>
+      <td>No</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>84%</td>
+      <td>580</td>
+      <td>604</td>
+    </tr>
+    <tr>
+      <td>33</td>
+      <td>The Iso Zo</td>
+      <td>No</td>
+      <td>Not Enough History</td>
+      <td>limited_history</td>
+      <td>50%</td>
+      <td>438</td>
+      <td>438</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Sightless™ I 強的</td>
+      <td>No</td>
+      <td>Not Enough History</td>
+      <td>ml_model</td>
+      <td>72%</td>
+      <td>607</td>
+      <td>640</td>
+    </tr>
+    <tr>
+      <td>40</td>
+      <td>HumBleGuY</td>
+      <td>No</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>64%</td>
+      <td>386</td>
+      <td>389</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>Agent</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>83%</td>
+      <td>548</td>
+      <td>597</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td>Seto Kaiba｜波多黎各</td>
+      <td>Yes</td>
+      <td>Reliable High Performer</td>
+      <td>ml_model</td>
+      <td>89%</td>
+      <td>545</td>
+      <td>590</td>
+    </tr>
+    <tr>
+      <td>43</td>
+      <td>Dukeypoo❤️Zo</td>
+      <td>No</td>
+      <td>Inconsistent Contributor</td>
+      <td>ml_model</td>
+      <td>61%</td>
+      <td>341</td>
+      <td>376</td>
+    </tr>
+    <tr>
+      <td>49</td>
+      <td>Thundrrun</td>
+      <td>Yes</td>
+      <td>Not Enough History</td>
+      <td>ml_model</td>
+      <td>66%</td>
+      <td>381</td>
+      <td>342</td>
+    </tr>
+  </tbody>
+</table>
+
+        </div>
+
+    </div>
+
+
+    <div class="section">
+
+        <h2>
+            Galactic Kings — Top Backups
+        </h2>
+
+        <p>
+            Next players in line if a recommended starter is unavailable.
+        </p>
+
+        <div class="table-wrap">
+
+            <table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Rank</th>
+      <th>Player</th>
+      <th>Currently In Clan</th>
+      <th>Archetype</th>
+      <th>Historical Participation</th>
+      <th>Confirmed-Active Daily</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>51</td>
+      <td>batan</td>
+      <td>Yes</td>
+      <td>Inconsistent Contributor</td>
+      <td>55%</td>
+      <td>332</td>
+    </tr>
+    <tr>
+      <td>52</td>
+      <td>Moath_LY</td>
+      <td>No</td>
+      <td>Inconsistent Contributor</td>
+      <td>77%</td>
+      <td>330</td>
+    </tr>
+    <tr>
+      <td>53</td>
+      <td>AL_JOKER</td>
+      <td>Yes</td>
+      <td>Not Enough History</td>
+      <td>68%</td>
+      <td>304</td>
+    </tr>
+    <tr>
+      <td>54</td>
+      <td>hog❤️</td>
+      <td>No</td>
+      <td>Inconsistent Contributor</td>
+      <td>65%</td>
+      <td>275</td>
+    </tr>
+    <tr>
+      <td>55</td>
+      <td>Always Lucky</td>
+      <td>Yes</td>
+      <td>Low-Participation Player</td>
+      <td>62%</td>
+      <td>274</td>
+    </tr>
+    <tr>
+      <td>56</td>
+      <td>▁ ▂ ▃ ▄ ▅ ▆ █ Ⓓ</td>
+      <td>No</td>
+      <td>Not Enough History</td>
+      <td>100%</td>
+      <td>225</td>
+    </tr>
+    <tr>
+      <td>57</td>
+      <td>GK03™</td>
+      <td>No</td>
+      <td>Inconsistent Contributor</td>
+      <td>80%</td>
+      <td>206</td>
+    </tr>
+    <tr>
+      <td>58</td>
+      <td>Babsking</td>
+      <td>Yes</td>
+      <td>Inconsistent Contributor</td>
+      <td>81%</td>
+      <td>191</td>
+    </tr>
+    <tr>
+      <td>59</td>
+      <td>Horsey</td>
+      <td>No</td>
+      <td>Not Enough History</td>
+      <td>55%</td>
+      <td>187</td>
+    </tr>
+    <tr>
+      <td>60</td>
+      <td>老板 Ι Batan’宙斯</td>
+      <td>No</td>
+      <td>Inconsistent Contributor</td>
+      <td>54%</td>
+      <td>181</td>
+    </tr>
+  </tbody>
+</table>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer">
+
+        Generated 2026-09-16 10:01
+        · Clash Royale War ML Project
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
