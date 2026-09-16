@@ -1,5 +1,25 @@
+# Secrets
 .env
-venv/
-__pycache__/
+.env.*
+!.env.example
+
 # Editor backup files
 *~
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log

@@ -1,324 +1,518 @@
-Galactic Kings Clan War Analytics
+# Galactic Kings Clan War Analytics
 
-A machine learning and data analytics system for Galactic Kings, a competitive Clash Royale clan.
+An end-to-end machine learning and data analytics system built for **Galactic Kings**, a competitive Clash Royale clan.
 
-The project collects Clan War data from the Clash Royale API, stores historical and live data in MySQL, builds player-level behavioral features, predicts player participation and performance, clusters players into behavioral archetypes, recommends a 50-player Battle Day rotation, and generates a live HTML dashboard for clan leadership.
+The project collects Clan War data from the Clash Royale API, stores historical and live data in MySQL, engineers player-level features, predicts player participation and performance, clusters players into behavioral archetypes, recommends a 50-player Battle Day rotation, forecasts Galactic Kings' River Race performance, and generates an interactive-style HTML analytics dashboard.
 
-Project Goals
+## Highlights
 
-The system is designed to answer questions such as:
+* 6,000+ historical player-war observations used for supervised modeling
+* Live predictions across the current Galactic Kings rotation pool
+* Random Forest participation modeling
+* Regression-based player performance forecasting
+* K-Means player behavior clustering
+* Automatic selection of archetype cluster count using silhouette score
+* 50-player Battle Day rotation optimization
+* Ranked backup recommendations
+* Galactic Kings-specific River Race forecasting
+* MySQL + Docker data pipeline
+* Automated HTML analytics dashboard
+* Separate handling for River Race and Colosseum weeks
 
-Which Galactic Kings players are the most reliable war contributors?
+---
 
-Which players are likely to participate in the next war?
+## Project Goal
 
-How much production can we expect from the current rotation pool?
+Galactic Kings regularly rotates players in and out of the clan to maximize participation during Clan Wars.
 
-Which 50 players should be prioritized for a Battle Day lineup?
+Because the clan can use up to 50 unique participants during a Battle Day, the current in-game roster does not necessarily represent the full group of players available for war.
 
-Which players should serve as backups?
+This project was built to help answer questions such as:
 
-What behavioral archetypes exist within Galactic Kings?
+* Which GK players are the most reliable war contributors?
+* Which players are most likely to participate?
+* How much production can we expect from the current rotation pool?
+* Which 50 players should be prioritized for a Battle Day?
+* Which players should be backups?
+* Which players consistently perform at a high level?
+* Which players are inconsistent or participate infrequently?
+* How does the current war compare with GK's historical performance?
+* When is Galactic Kings projected to finish the River Race?
 
-How does the current war compare with Galactic Kings' historical performance?
+The final analytics system is intentionally focused only on **Galactic Kings**.
 
-When is Galactic Kings projected to finish the River Race?
+---
 
-The final analytics and dashboard are intentionally focused only on Galactic Kings.
+# System Architecture
 
-Current Pipeline
-
+```text
 Clash Royale API
         |
         v
 collect_data.py
         |
         v
-MySQL
+      MySQL
         |
-        +---------------------------+
-        |                           |
-        v                           v
+        +------------------------------+
+        |                              |
+        v                              v
 build_features.py          build_player_archetypes.py
-        |                           |
-        v                           v
-Historical ML Dataset      GK Player Archetypes
-        |                           |
-        +-------------+-------------+
-                      |
-                      v
-          build_live_player_features.py
-                      |
-                      v
-             predict_live_players.py
-                      |
-                      v
-        gk_live_player_predictions.csv
-                      |
-          +-----------+------------+
-          |                        |
-          v                        v
-build_daily_clan_features.py   optimize_gk_rotation.py
-          |                        |
-          v                        v
-    GK War History          Recommended 50 + Backups
-          |                        |
-          +-----------+------------+
-                      |
-                      v
-              predict_live_war.py
-                      |
-                      v
-              build_dashboard.py
-                      |
-                      v
-         reports/gk_war_dashboard.html
+        |                              |
+        v                              v
+Historical ML Dataset          GK Player Archetypes
+        |                              |
+        +---------------+--------------+
+                        |
+                        v
+            build_live_player_features.py
+                        |
+                        v
+               predict_live_players.py
+                        |
+                        v
+          GK Live Player Predictions
+                        |
+             +----------+----------+
+             |                     |
+             v                     v
+build_daily_clan_features.py  optimize_gk_rotation.py
+             |                     |
+             v                     v
+        GK War History      Recommended 50 + Backups
+             |                     |
+             +----------+----------+
+                        |
+                        v
+                predict_live_war.py
+                        |
+                        v
+                build_dashboard.py
+                        |
+                        v
+           reports/gk_war_dashboard.html
+```
 
-Main Features
+---
 
-Live Galactic Kings Player Modeling
+# Machine Learning Pipeline
 
-The live player pipeline builds one feature row for every player observed in the current Galactic Kings war rotation pool.
+## 1. Historical Feature Engineering
 
-Players can remain part of the rotation pool even if they are temporarily outside the clan, which is important because Galactic Kings rotates war-only players in and out to fill the available Battle Day participant slots.
+The historical dataset contains one row per player-war observation.
 
-Current player prediction tiers:
+Player features include:
 
-ml_model — enough historical data for the full model
+* recent average Fame
+* recent average decks used
+* recent Fame per deck
+* participation rate
+* full-participation rate
+* previous-war Fame
+* previous-war decks
+* recent Fame trend
+* recent Fame variance
+* recent deck-use variance
+* Galactic Kings clan-score context
 
-limited_history — one or two historical wars
+These features are constructed so that predictions use information from previous wars rather than future target information.
 
-clan_baseline — insufficient individual history
+---
 
-Participation Model
+## 2. Participation Prediction
 
-A Random Forest classifier estimates each player's probability of participating.
+A **Random Forest classifier** estimates the probability that a player participates in a war.
 
-That probability is also used to normalize expected participation across the current rotation pool so the system reflects the approximately 50 available Battle Day participant slots.
+Participation probability is useful because player performance alone does not tell the full story.
 
-Player Performance Forecast
+A highly skilled player who rarely participates may be less useful for an expected-value lineup than a slightly lower-performing player who consistently completes war attacks.
 
-The main player performance model uses historical features such as:
+The system therefore models:
 
-recent average Fame
+```text
+P(player participates)
+```
 
-recent average decks used
+separately from expected player production.
 
-recent efficiency
+---
 
-historical participation rate
+## 3. Player Performance Prediction
 
-full-participation rate
+The system predicts player war production using historical player behavior.
 
-previous-war Fame
+The live pipeline supports three prediction tiers:
 
-previous-war decks
+### Full ML Model
 
-recent Fame trend
+Used when a player has sufficient historical data and all required model features.
 
-recent Fame variance
+```text
+prediction_tier = ml_model
+```
 
-recent deck-use variance
+### Limited History
 
-Galactic Kings historical clan score context
+Used when a player has only one or two historical wars.
 
-The current live forecast combines the primary regression estimate with a confirmed-active estimate when available.
+```text
+prediction_tier = limited_history
+```
 
-Player Archetypes
+### Clan Baseline
 
-K-Means clustering is used to identify behavioral groups among Galactic Kings players.
+Used for players with insufficient individual history.
 
-The number of clusters is selected by comparing silhouette scores rather than fixing a cluster count in advance.
+```text
+prediction_tier = clan_baseline
+```
 
-Current examples include:
+This allows every player in the current GK rotation pool to receive a usable estimate, including new players.
 
-Reliable High Performer
+---
 
-Inconsistent Contributor
+# Galactic Kings Player Archetypes
 
-Low-Participation Player
+The project uses **K-Means clustering** to identify different types of war players.
 
-Cluster IDs are not hard-coded to names. Archetype names are assigned from the actual behavior of each cluster after clustering.
+Only players in the current Galactic Kings rotation pool are included in the final archetype system.
 
-Rotation Optimization
+Each player's full historical performance can still be used to describe their behavior.
 
-The system produces two GK lineup rankings:
+Features used for clustering include:
 
-Expected-Value Lineup
+* average Fame
+* average decks
+* participation rate
+* full-participation rate
+* Fame per deck
+* Fame consistency
+* deck-use consistency
 
-Useful when player availability is uncertain.
+Before clustering, features are standardized with `StandardScaler`.
 
-Confirmed-Active Lineup
+The system compares several possible cluster counts using the **silhouette score** rather than choosing the number of clusters manually.
 
-Useful when leadership knows which players are available for that Battle Day.
+Example archetypes include:
 
-The optimizer outputs:
+* **Reliable High Performer**
+* **Inconsistent Contributor**
+* **Low-Participation Player**
 
-recommended 50-player lineup
+K-Means cluster IDs are arbitrary, so the project does not permanently map cluster numbers to labels.
 
-ranked backups
+Instead, archetype names are assigned based on the actual behavior of each cluster after training.
 
-expected production
+---
 
-confirmed-active production
+# Live Galactic Kings Rotation Pool
 
-current-member vs. rotated-out counts
+One important design decision is that the system does not assume the current clan roster represents the entire available war roster.
 
-Galactic Kings War Forecast
+Galactic Kings frequently rotates war players in and out.
 
-The war forecast uses only Galactic Kings data.
+The live rotation pool therefore includes:
 
-It does not attempt to model or rank opponent clans.
+```text
+Current GK members
++
+GK players already observed in the current live race
+```
 
-For River Race weeks, the forecast can use Galactic Kings' historical Battle Day behavior to estimate:
+This means a player can remain part of the war-planning pool even when temporarily outside the clan.
 
-projected daily Medals
+The pipeline tracks:
 
-expected placement context
+* total rotation-pool players
+* currently active clan members
+* players currently outside the clan
+* historical performance
+* prediction tier
+* participation probability
+* archetype
+* expected production
 
-rank movement
+---
 
-defense movement
+# 50-Player Rotation Optimization
 
-River progress
+Galactic Kings attempts to fill all 50 available Battle Day participant slots.
 
-projected finish day
+The optimizer creates two separate rankings.
 
-Colosseum weeks are handled separately because they do not use the normal 10,000-point River Race finish line.
+## Expected-Value Lineup
 
-Dashboard
+Used when player availability is not yet confirmed.
 
-The project generates a GK-only dashboard at:
+The ranking considers predicted production while participation remains uncertain.
 
+This answers:
+
+> Who gives GK the strongest expected lineup before we know exactly who will play?
+
+---
+
+## Confirmed-Active Lineup
+
+Used when a player is known to be available.
+
+Once availability is confirmed, the system emphasizes projected active production rather than historical attendance probability.
+
+This answers:
+
+> If these players are definitely available, which 50 should GK use?
+
+The optimizer produces:
+
+* recommended 50-player lineup
+* expected-value ranking
+* confirmed-active ranking
+* ranked backups
+* current-member count
+* outside-clan rotation count
+* projected lineup production
+* archetype breakdown
+
+---
+
+# Galactic Kings War Forecast
+
+The final war forecasting system models **Galactic Kings only**.
+
+Opponent clans are not individually modeled or displayed in the final dashboard.
+
+For River Race weeks, the system combines:
+
+* current GK player predictions
+* projected participation
+* historical GK Battle Day performance
+* historical movement
+* historical finish behavior
+* current River progress
+
+to estimate:
+
+* projected Battle Day production
+* projected movement
+* projected River progress
+* projected finish day
+
+If historical evidence is unavailable for a particular value, the system avoids inventing a result.
+
+---
+
+# Colosseum Handling
+
+Colosseum weeks are treated separately from normal River Race weeks.
+
+Normal River Race analysis includes the 10,000-point River finish condition.
+
+Colosseum does not use the same finish structure, so the dashboard adjusts its displayed metrics accordingly.
+
+---
+
+# Dashboard
+
+The project generates a Galactic Kings-only HTML dashboard:
+
+```text
 reports/gk_war_dashboard.html
+```
 
 The dashboard includes:
 
-rotation-pool size
+### Current War Overview
 
-current clan members
+* current Battle Day
+* projected total production
+* projected River progress
+* projected finish day
+* historical GK finish behavior
 
-players currently outside the clan
+### Rotation Pool
 
-expected daily participants
+* total available GK rotation players
+* current members
+* players currently outside the clan
+* expected daily participants
+* ML coverage
 
-ML coverage
+### Player Analytics
 
-player-model projected production
+* top live player forecasts
+* participation probability
+* prediction tier
+* behavioral archetype
+* projected daily production
 
-current River Race / Colosseum outlook
+### Player Archetypes
 
-projected finish day
+* cluster sizes
+* average Fame
+* average deck usage
+* participation rate
+* full-participation rate
+* efficiency
 
-historical Day-3 finish rate
+### Rotation Optimization
 
-day-by-day GK forecast
+* recommended 50-player lineup
+* current-member status
+* expected-value production
+* confirmed-active production
+* ranked backups
 
-GK player archetypes
+---
 
-top player forecasts
+# Repository Structure
 
-recommended 50-player lineup
-
-top backups
-
-Generate and open it with:
-
-python src/build_dashboard.py
-open reports/gk_war_dashboard.html
-
-Project Structure
-
+```text
 clash-war-ml/
-|
+│
 ├── data/
-|   ├── model_dataset.csv
-|   ├── gk_player_archetypes.csv
-|   ├── gk_player_archetype_summary.csv
-|   ├── gk_live_player_features.csv
-|   ├── gk_live_player_predictions.csv
-|   ├── gk_live_player_summary.csv
-|   ├── gk_daily_war_dataset.csv
-|   ├── gk_race_summary.csv
-|   ├── gk_live_war_projection.csv
-|   ├── gk_live_war_day_projection.csv
-|   ├── gk_rotation_active_lineup.csv
-|   ├── gk_rotation_backups.csv
-|   └── gk_rotation_summary.csv
-|
+│   ├── model_dataset.csv
+│   ├── player_test_predictions.csv
+│   │
+│   ├── gk_player_archetypes.csv
+│   ├── gk_player_archetype_summary.csv
+│   │
+│   ├── gk_live_player_features.csv
+│   ├── gk_live_player_predictions.csv
+│   ├── gk_live_player_summary.csv
+│   │
+│   ├── gk_daily_war_dataset.csv
+│   ├── gk_race_summary.csv
+│   │
+│   ├── gk_live_war_player_projection.csv
+│   ├── gk_live_war_day_projection.csv
+│   ├── gk_live_war_projection.csv
+│   │
+│   ├── gk_rotation_expected_value.csv
+│   ├── gk_rotation_active_lineup.csv
+│   ├── gk_rotation_backups.csv
+│   └── gk_rotation_summary.csv
+│
 ├── reports/
-|   └── gk_war_dashboard.html
-|
+│   └── gk_war_dashboard.html
+│
 ├── sql/
-|   └── schema.sql
-|
+│   └── schema.sql
+│
 ├── src/
-|   ├── collect_data.py
-|   ├── build_features.py
-|   ├── build_player_archetypes.py
-|   ├── build_live_player_features.py
-|   ├── predict_live_players.py
-|   ├── build_daily_clan_features.py
-|   ├── predict_live_war.py
-|   ├── optimize_gk_rotation.py
-|   └── build_dashboard.py
-|
-├── .env
+│   ├── collect_data.py
+│   ├── build_features.py
+│   │
+│   ├── train_model.py
+│   ├── train_participation.py
+│   ├── train_active_decks.py
+│   ├── train_efficiency.py
+│   ├── train_two_stage.py
+│   ├── train_final_pipeline.py
+│   ├── train_gradient_boosting.py
+│   │
+│   ├── build_player_archetypes.py
+│   ├── build_live_player_features.py
+│   ├── predict_live_players.py
+│   ├── build_daily_clan_features.py
+│   ├── predict_live_war.py
+│   ├── optimize_gk_rotation.py
+│   └── build_dashboard.py
+│
+├── .env.example
 ├── .gitignore
+├── requirements.txt
 └── README.md
+```
 
-Additional training and evaluation scripts may also be present in src/.
+---
 
-Technologies
+# Technologies
 
-Python
+### Programming
 
-pandas
+* Python
 
-NumPy
+### Data Analysis
 
-scikit-learn
+* pandas
+* NumPy
 
-SQLAlchemy
+### Machine Learning
 
-PyMySQL
+* scikit-learn
+* Linear Regression
+* Random Forest
+* Gradient Boosting experimentation
+* K-Means clustering
+* StandardScaler
+* silhouette analysis
 
-MySQL
+### Database
 
-Docker
+* MySQL
+* SQLAlchemy
+* PyMySQL
+* Docker
 
-Clash Royale API
+### Data Source
 
-HTML/CSS
+* Clash Royale API
 
-Git / GitHub
+### Visualization / Reporting
 
-Setup
+* HTML
+* CSS
+* pandas HTML table generation
 
-1. Clone the repository
+### Development
 
-git clone <your-repository-url>
+* Git
+* GitHub
+* Python virtual environments
+
+---
+
+# Setup
+
+## 1. Clone the Repository
+
+```bash
+git clone https://github.com/loganbeach11/clash-war-ml.git
 cd clash-war-ml
+```
 
-2. Create a virtual environment
+---
 
+## 2. Create a Virtual Environment
+
+```bash
 python3 -m venv venv
 source venv/bin/activate
+```
 
-3. Install dependencies
+---
 
-At minimum, the project uses:
+## 3. Install Dependencies
 
-pip install pandas numpy scikit-learn sqlalchemy pymysql python-dotenv requests
-
-If a requirements.txt file is included, use:
-
+```bash
 pip install -r requirements.txt
+```
 
-4. Configure environment variables
+---
 
-Create a local .env file:
+## 4. Configure Environment Variables
 
+Copy the example environment configuration:
+
+```bash
+cp .env.example .env
+```
+
+Then update `.env` with your own credentials.
+
+Example:
+
+```env
 CLASH_ROYALE_API_TOKEN=your_api_token_here
 
 DB_HOST=127.0.0.1
@@ -326,92 +520,162 @@ DB_PORT=33306
 DB_USER=root
 DB_PASSWORD=your_mysql_password
 DB_NAME=clash_war_ml
+```
 
-Do not commit .env.
+The real `.env` file is excluded from Git.
 
-5. Start MySQL
+---
 
-The project was developed with MySQL running in Docker.
+## 5. Start MySQL
+
+The project was developed using MySQL in Docker.
 
 Example:
 
+```bash
 docker start mysql-server-x370
+```
 
-Create the database schema using:
+The database structure is defined in:
 
+```text
 sql/schema.sql
+```
 
-Running the Analytics Pipeline
+---
 
-A typical refresh is:
+# Running the Pipeline
 
+A full analytics refresh can be run in this order:
+
+```bash
 python src/collect_data.py
+
 python src/build_features.py
+
 python src/build_player_archetypes.py
+
 python src/build_live_player_features.py
+
 python src/predict_live_players.py
+
 python src/build_daily_clan_features.py
+
 python src/predict_live_war.py
+
 python src/optimize_gk_rotation.py
+
 python src/build_dashboard.py
+```
 
-Then:
+Then open the dashboard:
 
+```bash
 open reports/gk_war_dashboard.html
+```
 
-Some historical model-building scripts do not need to be rerun every time live data is refreshed.
+---
 
-Current Model Notes
+# Historical Training vs. Live GK Analysis
 
-The historical supervised dataset contains thousands of player-war observations.
+The supervised player models currently retain a larger historical training dataset containing thousands of player-war observations.
 
-The project currently keeps the larger historical training dataset for supervised model training because it provides substantially more examples than Galactic Kings alone.
+This provides substantially more training examples than using Galactic Kings history alone.
 
-However:
- - live predictions are Galactic Kings-only
- - archetype outputs are Galactic Kings-only
- - rotation optimization is Galactic Kings-only
- - war forecasting is Galactic Kings-only
- - the final dashboard is Galactic Kings-only
+However, the final live system is GK-specific:
 
-This allows the models to learn from a larger historical sample while keeping the final product focused on Galactic Kings.
+```text
+Historical model training → larger dataset
 
-Important Modeling Limitations
+Live features              → Galactic Kings only
+Player predictions         → Galactic Kings only
+Player archetypes          → Galactic Kings only
+Rotation optimization      → Galactic Kings only
+War forecasting            → Galactic Kings only
+Dashboard                  → Galactic Kings only
+```
 
-This is an analytics and portfolio project, not an official Clash Royale system.
+This approach allows the models to benefit from a larger supervised training sample while keeping the final application entirely focused on Galactic Kings.
 
-Several values should be interpreted as model estimates rather than guaranteed outcomes.
+---
 
-In particular:
- - player performance predictions are historical estimates
- - capacity_adjusted_fame is a rotation-planning heuristic
- - player-level Fame estimates are not identical to Clan      War River movement
- - future River movement uses Galactic Kings historical behavior when direct future outcomes are unavailable
- - player-day historical data is still limited compared with  player-war historical data
- - new players with little or no history require fallback estimates
+# Modeling Limitations
 
-The project intentionally avoids presenting these heuristics as guaranteed or proven optimal outcomes.
+This project is an independent analytics and machine learning project and is not affiliated with or endorsed by Supercell.
 
-Future Improvements
+Predictions should be interpreted as estimates rather than guaranteed outcomes.
 
- Potential next steps include:
-  - store true historical player-day performance
-  - evaluate predictions against each completed Battle Day
-  - track prediction error over time
-  - retrain and compare additional regression models
-  - measure model performance specifically on Galactic Kings holdout data
-  - add uncertainty intervals
+Important limitations include:
 
-create a web-hosted dashboard
+* historical player behavior may not perfectly predict future participation
+* new players have limited historical information
+* player-war data is more complete than player-day historical data
+* `capacity_adjusted_fame` is a planning heuristic
+* predicted player Fame is not equivalent to River Race movement
+* future movement estimates rely partly on historical GK behavior
+* Battle Day rotation availability may change after predictions are generated
+* the current combined live forecast is a practical heuristic and should continue to be evaluated against future completed wars
 
-connect predictions to the Galactic Kings Discord bot
+The project intentionally distinguishes between trained model outputs and planning heuristics rather than presenting every estimate as a proven optimal result.
 
-automatically refresh data and forecasts
+---
 
-recommend daily rotations based on confirmed player availability
+# Future Improvements
 
-add historical player trend visualizations
+Planned improvements include:
 
-Author
+* collect true historical player-day performance
+* save prediction snapshots before each Battle Day
+* compare predictions against actual outcomes
+* calculate prediction error over time
+* evaluate models specifically on Galactic Kings holdout data
+* compare additional regression algorithms
+* add uncertainty intervals
+* improve daily participation forecasting
+* automatically detect confirmed player availability
+* build historical player trend visualizations
+* deploy the dashboard as a hosted web application
+* integrate predictions into the Galactic Kings Discord bot
+* automate scheduled data collection
+* automatically generate Battle Day rotation recommendations
+* track model performance over multiple seasons
 
-Built by Logan Beach as a machine learning / data science portfolio project using real Clash Royale Clan War data.
+---
+
+# Why I Built This
+
+I wanted to build a machine learning project around a real system with continuously changing data rather than a static classroom dataset.
+
+Galactic Kings provided an opportunity to combine:
+
+* API data collection
+* relational database design
+* feature engineering
+* supervised machine learning
+* unsupervised learning
+* optimization
+* live prediction
+* data visualization
+
+into a single end-to-end application with a real use case.
+
+---
+
+# Author
+
+**Logan Beach**
+
+Computer Science
+Applied Data Science
+
+University of Georgia
+
+GitHub: [loganbeach11](https://github.com/loganbeach11)
+
+---
+
+## Disclaimer
+
+This project is an independent educational and portfolio project.
+
+Clash Royale and all related game assets and terminology are trademarks of Supercell. This project is not affiliated with, endorsed by, sponsored by, or specifically approved by Supercell.
